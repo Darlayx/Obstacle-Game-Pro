@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Hindari Rintangan Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #6DD5FA 0%, #FF758C 100%); 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; 
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif; 
+            padding-top: 2vh; 
+        }
+        #gameContainer {
+            position: relative;
+            width: 90vw; 
+            max-width: 650px; 
+            aspect-ratio: 9 / 18; 
+            background-color: rgba(255, 255, 255, 0.95); 
+            border-radius: 24px; 
+            box-shadow: 0 20px 45px rgba(0,0,0,0.25); 
+            overflow: hidden; 
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 24px; 
+        }
+        .ui-text-container { 
+            position: absolute;
+            top: 20px; 
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none; 
+        }
+        .ui-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; 
+        }
+        .ui-column.right {
+            align-items: flex-end;
+        }
+        .ui-element {
+            color: #1A202C; 
+            font-weight: 600;
+            padding: 6px 10px; 
+            border-radius: 8px; 
+            background-color: rgba(255, 255, 255, 0.8); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+            text-align: center;
+        }
+        #hpContainer.ui-element, #score.ui-element {
+            font-size: clamp(11px, 2.2vw, 14px); 
+            min-width: 80px;
+        }
+        #highScore.ui-element {
+            font-size: clamp(10px, 1.9vw, 12.5px);
+            min-width: 70px;
+            padding: 5px 8px;
+        }
+        
+        #hpContainer {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        #hpBarOuter {
+            width: 100px; 
+            height: 14px; 
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 7px;
+            padding: 2px;
+            box-shadow: inset 0 1px 2.5px rgba(0,0,0,0.1);
+        }
+        #hpBarInner {
+            height: 100%;
+            background-color: #4CAF50; 
+            border-radius: 5px;
+            transition: width 0.3s ease-out, background-color 0.3s ease-out;
+        }
+        
+        #activePowerUpUI {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px; 
+            margin-top: 4px; 
+        }
+        .active-powerup-info {
+            display: flex;
+            align-items: center;
+            gap: 6px; 
+            font-size: clamp(10px, 1.9vw, 12.5px); 
+            color: white;
+            background-color: rgba(0,0,0,0.7); 
+            padding: 4px 7px; 
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .powerup-timer-bar-container {
+            width: 60px; 
+            height: 6px; 
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .powerup-timer-bar {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        .screen-overlay { 
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            color: white; text-align: center;
+            border-radius: 24px; padding: 25px; 
+            box-sizing: border-box; opacity: 0; 
+            visibility: hidden; 
+            transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            backdrop-filter: blur(5px); 
+        }
+        .screen-overlay.active { opacity: 1; visibility: visible; }
+        #mainMenuScreen { background-color: rgba(26, 32, 44, 0.92); z-index: 10; }
+        #gameOverScreen { background-color: rgba(199, 0, 57, 0.92); z-index: 9; }
+        #settingsScreen { background-color: rgba(44, 62, 80, 0.95); z-index: 11; }
+        
+        .screen-overlay h1, .screen-overlay h2 {
+            font-size: clamp(30px, 6.5vw, 44px); 
+            font-weight: 700; margin-bottom: 18px;
+            text-shadow: 0 3px 7px rgba(0,0,0,0.45);
+            letter-spacing: 0.5px; 
+        }
+         #settingsScreen h2 { margin-bottom: 25px; }
+
+        .screen-overlay p {
+            font-size: clamp(14px, 3.1vw, 19px); 
+            margin-bottom: 25px; max-width: 85%;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.85); 
+        }
+        .screen-button-container { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px; 
+            margin-top: 10px;
+            width: 80%;
+            max-width: 300px; 
+        }
+        .screen-button { 
+            padding: 13px 25px; font-size: clamp(15px, 3.5vw, 18px);
+            font-weight: 600; color: white;
+            border: none; border-radius: 10px; 
+            cursor: pointer;
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, background-color 0.2s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+        .screen-button:hover {
+            transform: translateY(-2.5px) scale(1.01); 
+            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+        }
+        #startGameButton { background: linear-gradient(45deg, #4CAF50, #81C784); }
+        #startGameButton:hover { background: linear-gradient(45deg, #388E3C, #66BB6A); }
+        #settingsButton { background: linear-gradient(45deg, #607D8B, #90A4AE); } 
+        #settingsButton:hover { background: linear-gradient(45deg, #455A64, #78909C); }
+        #restartButton { background: linear-gradient(45deg, #2196F3, #64B5F6); }
+        #restartButton:hover { background: linear-gradient(45deg, #1976D2, #42A5F5); }
+        #deleteHighScoreButton { background: linear-gradient(45deg, #F44336, #E57373); font-size: clamp(12px, 2.8vw, 15px); padding: 10px 20px; }
+        #deleteHighScoreButton:hover { background: linear-gradient(45deg, #D32F2F, #EF5350); }
+        #backToMenuButton { background: linear-gradient(45deg, #757575, #9E9E9E); } 
+        #backToMenuButton:hover { background: linear-gradient(45deg, #616161, #757575); }
+
+        .settings-group { margin-bottom: 20px; width: 100%; }
+        .settings-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: clamp(13px, 2.8vw, 16px); }
+        .settings-control { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .settings-control input[type="range"] { flex-grow: 1; cursor: pointer; -webkit-appearance: none; appearance: none; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; outline: none;}
+        .settings-control input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; background: #fff; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .settings-control input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; background: #fff; border-radius: 50%; cursor: pointer; border:none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .toggle-button { padding: 8px 15px; font-size: clamp(12px, 2.5vw, 14px); }
+        .toggle-button.on { background-color: #4CAF50; }
+        .toggle-button.off { background-color: #f44336; }
+
+        #confirmDeleteModal {
+            position: fixed; 
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(40, 40, 50, 0.97); 
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            z-index: 100; 
+            display: none; 
+            width: 90%;
+            max-width: 350px;
+            color: white;
+        }
+        #confirmDeleteModal p { font-size: clamp(14px, 3vw, 17px); margin-bottom: 20px; }
+        .confirm-buttons { display: flex; justify-content: space-around; gap: 10px; }
+
+
+        #leftControl, #rightControl {
+            position: absolute; top: 0; width: 50%; height: 100%;
+            cursor: pointer;  z-index: 1; 
+        }
+        #leftControl { left: 0; }
+        #rightControl { right: 0; }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="mainMenuScreen" class="screen-overlay">
+            <h1>Hindari Rintangan Pro</h1>
+            <p>Kumpulkan power-up, hindari rintangan, dan bertahanlah selama mungkin!</p>
+            <div class="screen-button-container">
+                <button id="startGameButton" class="screen-button">Mulai Game</button>
+                <button id="settingsButton" class="screen-button">Pengaturan</button>
+            </div>
+        </div>
+
+        <div id="settingsScreen" class="screen-overlay">
+            <h2>Pengaturan</h2>
+            <div class="settings-group">
+                <label for="soundtrackVolume">Volume Soundtrack:</label>
+                <div class="settings-control">
+                    <input type="range" id="soundtrackVolume" min="0" max="1" step="0.01" value="0.5">
+                    <button id="soundtrackToggle" class="screen-button toggle-button on">ON</button>
+                </div>
+            </div>
+            <div class="settings-group">
+                <label for="sfxVolume">Volume Efek Suara:</label>
+                <div class="settings-control">
+                    <input type="range" id="sfxVolume" min="0" max="1" step="0.01" value="0.8">
+                    <button id="sfxToggle" class="screen-button toggle-button on">ON</button>
+                </div>
+            </div>
+            <div class="screen-button-container" style="margin-top: 30px;">
+                <button id="deleteHighScoreButton" class="screen-button">Hapus Rekor</button>
+                <button id="backToMenuButton" class="screen-button">Kembali</button>
+            </div>
+        </div>
+
+        <div id="confirmDeleteModal">
+            <p>Apakah Anda yakin ingin menghapus rekor waktu tertinggi?</p>
+            <div class="confirm-buttons">
+                <button id="confirmDeleteYes" class="screen-button" style="background-color: #D32F2F;">Ya, Hapus</button>
+                <button id="confirmDeleteNo" class="screen-button" style="background-color: #757575;">Batal</button>
+            </div>
+        </div>
+
+
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="ui-text-container">
+            <div class="ui-column left">
+                <div id="hpContainer" class="ui-element">
+                    <span>HP:</span>
+                    <div id="hpBarOuter"><div id="hpBarInner"></div></div>
+                </div>
+                <div id="activePowerUpUI"></div> 
+            </div>
+            <div class="ui-column right">
+                <div id="score" class="ui-element">Waktu: 0,00s</div>
+                <div id="highScore" class="ui-element">Rekor: 0,00s</div>
+            </div>
+        </div>
+        
+        <div id="leftControl"></div>
+        <div id="rightControl"></div>
+
+        <div id="gameOverScreen" class="screen-overlay">
+            <h2>Game Over!</h2>
+            <p id="finalScore">Waktu Bertahan: 0,00s</p>
+            <p id="gameOverHighScore">Rekor Waktu: 0,00s</p>
+            <div class="screen-button-container">
+                <button id="restartButton" class="screen-button">Mulai Ulang</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Tone.js Sound Synthesizers & Soundtrack ---
+        let hitSynth, gameOverSynth, clickSynth, difficultyUpSynth, deleteScoreSynth;
+        let absorbActivateSynth, slowActivateSynth, healActivateSynth, miniActivateSynth, polyActivateSynth;
+        // PERUBAHAN 3: Soundtrack Synths
+        let soundtrackMelodySynth, soundtrackPadSynth, soundtrackBassSynth;
+        let soundtrackMelodyLoop, soundtrackPadLoop, soundtrackBassLoop;
+        let globalReverb;
+
+        let soundsReady = false;
+        let sfxOn = true; 
+        let soundtrackOn = true; 
+        let sfxVolume = 0.8; 
+        let soundtrackVolume = 0.3; 
+
+        async function initSounds() {
+            await Tone.start(); 
+            
+            globalReverb = new Tone.Reverb(2.5).toDestination(); // Reverb lebih panjang
+            globalReverb.wet.value = 0.25; // Wetness disesuaikan
+
+            hitSynth = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0 } }).connect(globalReverb);
+            gameOverSynth = new Tone.MonoSynth({ oscillator: { type: "fatsawtooth", count:3 }, envelope: { attack: 0.1, decay: 1, sustain: 0.2, release: 2 }, filterEnvelope: { attack: 0.1, decay: 0.5, sustain: 1, release: 2, baseFrequency: 150, octaves: 3 } }).connect(globalReverb);
+            clickSynth = new Tone.MembraneSynth({ pitchDecay: 0.008, octaves: 2.5, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).toDestination(); // Click tidak perlu reverb banyak
+            difficultyUpSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.002, decay: 0.05, sustain: 0, release: 0.08 } }).connect(globalReverb);
+            deleteScoreSynth = new Tone.NoiseSynth({ noise: { type: "white" }, envelope: { attack: 0.01, decay: 0.15, sustain: 0 } }).connect(globalReverb);
+
+            absorbActivateSynth = new Tone.Synth({ oscillator: {type: "amsine", harmonicity: 1.2, modulationType: "sawtooth"}, envelope: {attack: 0.08, decay: 0.4, sustain:0.1, release: 0.3} }).connect(globalReverb);
+            slowActivateSynth = new Tone.Synth({ oscillator: {type: "fmsine", modulationType: "sine", harmonicity: 0.8, modulationIndex: 8}, envelope: {attack: 0.4, decay: 0.6, sustain:0.3, release: 1.2} }).connect(globalReverb);
+            healActivateSynth = new Tone.Synth({ oscillator: { type: 'sine' }, detune: 5, envelope: { attack: 0.02, decay: 0.5, sustain: 0.3, release: 0.6 } }).connect(globalReverb);
+            // PERUBAHAN 2: SFX Miniaturize
+            miniActivateSynth = new Tone.PluckSynth({ attackNoise: 0.1, dampening: 6000, resonance: 0.9, release: 0.3 }).connect(globalReverb);
+            polyActivateSynth = new Tone.PolySynth(Tone.Synth, { oscillator: {type: "fatsquare", spread: 20}, envelope: {attack: 0.08, decay: 0.3, sustain:0.4, release: 0.4} }).connect(globalReverb);
+            
+            // PERUBAHAN 3: Enhanced Soundtrack
+            soundtrackMelodySynth = new Tone.Synth({
+                oscillator: { type: "fmsine", harmonicity: 1.1, modulationIndex: 4, detune: -5 },
+                envelope: { attack: 0.2, decay: 0.5, sustain: 0.4, release: 1.5 },
+                portamento: 0.08
+            }).connect(globalReverb);
+
+            soundtrackPadSynth = new Tone.PolySynth(Tone.FMSynth, {
+                harmonicity: 0.7, modulationIndex: 1.5,
+                detune: 3,
+                oscillator: {type: "triangle"},
+                envelope: { attack: 2, decay: 1.5, sustain: 1, release: 3 },
+                modulationEnvelope: { attack: 1.8, decay: 1, sustain: 0.8, release: 2.5 }
+            }).connect(globalReverb);
+            
+            soundtrackBassSynth = new Tone.MonoSynth({
+                oscillator : { type : "fmsquare", modulationType: "sine", harmonicity: 0.5, modulationIndex: 2},
+                envelope : { attack : 0.1, decay : 0.2, sustain : 0.3, release: 0.8 },
+                filterEnvelope : { attack : 0.05, decay : 0.1, sustain : 0.2, release: 0.5, baseFrequency : 80, octaves : 2.5 }
+            }).connect(globalReverb);
+
+
+            const melodyPattern = [
+                { time: "0:0:0", note: "C4", duration: "1m" },
+                { time: "1:0:0", note: "G4", duration: "2n" },
+                { time: "1:2:0", note: "E4", duration: "2n" },
+                { time: "2:0:0", note: "A4", duration: "1m" },
+                { time: "3:0:0", note: "F4", duration: "2n" },
+                { time: "3:2:0", note: "D4", duration: "2n" }
+            ];
+            const padChords = [
+                { time: "0:0:0", note: ["C3", "G3", "C4"], duration: "2m" }, // Cmaj7-ish
+                { time: "2:0:0", note: ["A2", "E3", "A3"], duration: "2m" }  // Amin7-ish
+            ];
+            const bassPattern = [
+                { time: "0:0:0", note: "C2", duration: "1n"},
+                { time: "0:2:0", note: "G2", duration: "1n"},
+                { time: "1:0:0", note: "A2", duration: "1n"},
+                { time: "1:2:0", note: "E2", duration: "1n"},
+                { time: "2:0:0", note: "F2", duration: "1n"},
+                { time: "2:2:0", note: "C2", duration: "1n"},
+                { time: "3:0:0", note: "D2", duration: "2n"},
+                { time: "3:2:0", note: "G1", duration: "2n"},
+            ];
+
+            soundtrackMelodyLoop = new Tone.Part((time, value) => { soundtrackMelodySynth.triggerAttackRelease(value.note, value.duration, time); }, melodyPattern).start(0);
+            soundtrackPadLoop = new Tone.Part((time, value) => { soundtrackPadSynth.triggerAttackRelease(value.note, value.duration, time); }, padChords).start(0);
+            soundtrackBassLoop = new Tone.Part((time, value) => { soundtrackBassSynth.triggerAttackRelease(value.note, value.duration, time); }, bassPattern).start(0);
+            
+            [soundtrackMelodyLoop, soundtrackPadLoop, soundtrackBassLoop].forEach(loop => {
+                loop.loop = true; loop.loopEnd = "4m";
+            });
+            Tone.Transport.bpm.value = 68; 
+
+            applyVolumeSettings(); 
+            soundsReady = true;
+            console.log("Sound system initialized.");
+        }
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameContainer = document.getElementById('gameContainer');
+        const mainMenuScreen = document.getElementById('mainMenuScreen');
+        const startGameButton = document.getElementById('startGameButton');
+        const settingsButton = document.getElementById('settingsButton'); 
+        const settingsScreen = document.getElementById('settingsScreen'); 
+        const soundtrackVolumeSlider = document.getElementById('soundtrackVolume');
+        const soundtrackToggle = document.getElementById('soundtrackToggle');
+        const sfxVolumeSlider = document.getElementById('sfxVolume');
+        const sfxToggle = document.getElementById('sfxToggle');
+        const deleteHighScoreButton = document.getElementById('deleteHighScoreButton'); 
+        const backToMenuButton = document.getElementById('backToMenuButton');
+        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        const confirmDeleteYes = document.getElementById('confirmDeleteYes');
+        const confirmDeleteNo = document.getElementById('confirmDeleteNo');
+
+        const scoreDisplay = document.getElementById('score');
+        const highScoreDisplay = document.getElementById('highScore');
+        const hpDisplayContainer = document.getElementById('hpContainer');
+        const hpBarInner = document.getElementById('hpBarInner');
+        const activePowerUpUIDiv = document.getElementById('activePowerUpUI');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const gameOverHighScoreDisplay = document.getElementById('gameOverHighScore');
+        const restartButton = document.getElementById('restartButton');
+        const leftControl = document.getElementById('leftControl');
+        const rightControl = document.getElementById('rightControl');
+
+        let player, obstacles, currentScoreTime, highScoreTime, playerHP;
+        let powerUpsOnScreen = []; 
+        let activePowerUpEffects = {}; 
+        let animationFrameId;
+        let isGameOver = false;
+        let playerVelocityX = 0; 
+        let gameStartTime, lastMultiplierUpdateTime;
+        let minSpawnIntervalMs, maxSpawnIntervalMs;
+        let minObstacleSpeed, maxObstacleSpeed; 
+        let nextObstacleSpawnFrame;
+        let frameCount = 0; 
+        let playerHitEffectTimer = 0;
+        const playerHitEffectDuration = 15; 
+        const PLAYER_DEFAULT_COLOR = '#34495E'; 
+        const PLAYER_HIT_COLOR = '#E74C3C'; 
+        const TARGET_FPS = 60;
+        const MS_PER_FRAME = 1000 / TARGET_FPS;
+        let obstacleBaseRadius; 
+        let powerUpObjectRadius; 
+
+        const OBSTACLE_SHAPES = [
+            { type: 'circle', sides: 0, damage: 3, color: '#FFEB3B' },
+            { type: 'triangle', sides: 3, damage: 6, color: '#FFA726' },
+            { type: 'square', sides: 4, damage: 10, color: '#FF7043' },
+            { type: 'pentagon', sides: 5, damage: 15, color: '#F4511E' },
+            { type: 'hexagon', sides: 6, damage: 20, color: '#E53935' }
+        ];
+        
+        const POWER_UP_TYPES = {
+            ABSORB: { id: 'ABSORB', name: 'Absorb', color: '#48C9B0', draw: drawAbsorbShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 60 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateAbsorb, onExpire: deactivateAbsorb,
+                sfxCollect: () => { if(sfxOn && soundsReady) absorbActivateSynth.triggerAttackRelease("G3", "0.15n", Tone.now()); } },
+            SLOW: { id: 'SLOW', name: 'Slow', color: '#5499C7', draw: drawSlowShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 90 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateSlow, onExpire: deactivateSlow,
+                sfxCollect: () => { if(sfxOn && soundsReady) slowActivateSynth.triggerAttackRelease("D2", "0.5n", Tone.now()); } },
+            HEAL: { id: 'HEAL', name: 'Heal', color: '#2ECC71', draw: drawHealShape, duration: 0, minSpawn: 10 * TARGET_FPS, maxSpawn: 25 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateHeal,
+                sfxCollect: () => { if(sfxOn && soundsReady) { healActivateSynth.triggerAttackRelease("B4", "8n", Tone.now()); healActivateSynth.triggerAttackRelease("F#5", "16n", Tone.now() + 0.1); } } },
+            MINIATURIZE: { id: 'MINIATURIZE', name: 'Mini', color: '#A569BD', draw: drawMiniaturizeShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 120 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateMiniaturize, onExpire: deactivateMiniaturize,
+                sfxCollect: () => { if(sfxOn && soundsReady) { // Lebih "tinkling" dan pendek
+                    miniActivateSynth.triggerAttackRelease("A6", "0.05s", Tone.now());
+                    miniActivateSynth.triggerAttackRelease("E7", "0.05s", Tone.now() + 0.04);
+                } } },
+            POLYMORPH: { id: 'POLYMORPH', name: 'Poly', color: '#5D6D7E', draw: drawPolymorphShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 150 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activatePolymorph, onExpire: deactivatePolymorph,
+                sfxCollect: () => { if(sfxOn && soundsReady) polyActivateSynth.triggerAttackRelease(["D4", "F#4", "A4"], "0.25n", Tone.now()); } }
+        };
+        
+        function drawAbsorbShape(ctx, x, y, radius, color) { 
+            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = radius * 0.2;
+            ctx.beginPath(); ctx.arc(x, y, radius * 0.65, -Math.PI/2, Math.PI * 1.2); ctx.stroke(); 
+        }
+        function drawSlowShape(ctx, x, y, radius, color) { 
+            ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, radius * 0.12);
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i;
+                ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle)); ctx.stroke();
+                for (let j = 0; j < 2; j++) {
+                    const subAngle = angle + (j === 0 ? Math.PI / 6 : -Math.PI / 6); const L = radius * 0.4;
+                    ctx.moveTo(x + radius * 0.6 * Math.cos(angle), y + radius * 0.6 * Math.sin(angle));
+                    ctx.lineTo(x + radius * 0.6 * Math.cos(angle) + L * Math.cos(subAngle), y + radius * 0.6 * Math.sin(angle) + L * Math.sin(subAngle));
+                    ctx.stroke();
+                }
+            }
+        }
+        function drawHealShape(ctx, x, y, radius, color) { 
+            ctx.fillStyle = color; const barWidth = radius * 0.4; const barLength = radius * 1.4;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 5;
+            ctx.fillRect(x - barLength / 2, y - barWidth / 2, barLength, barWidth);
+            ctx.fillRect(x - barWidth / 2, y - barLength / 2, barWidth, barLength);
+            ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+        }
+        function drawMiniaturizeShape(ctx, x, y, radius, color) { 
+            ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, radius * 0.15);
+            const L = radius * 0.8; const S = radius * 0.3; 
+            const angles = [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2]; 
+            angles.forEach(baseAngle => {
+                const startX = x + L * Math.cos(baseAngle); const startY = y + L * Math.sin(baseAngle);
+                const endX = x + S * Math.cos(baseAngle); const endY = y + S * Math.sin(baseAngle);
+                ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
+                const arrowHeadSize = radius * 0.35;
+                ctx.lineTo(endX + arrowHeadSize * Math.cos(baseAngle + Math.PI * 0.75), endY + arrowHeadSize * Math.sin(baseAngle + Math.PI * 0.75));
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(endX + arrowHeadSize * Math.cos(baseAngle - Math.PI * 0.75), endY + arrowHeadSize * Math.sin(baseAngle - Math.PI * 0.75));
+                ctx.stroke();
+            });
+        }
+        function drawPolymorphShape(ctx, x, y, radius, color) { 
+            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.beginPath(); ctx.arc(x - radius*0.35, y - radius*0.35, radius * 0.35, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x + radius*0.3, y + radius*0.25, radius * 0.3, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.beginPath(); ctx.arc(x, y, radius * 0.15, 0, Math.PI * 2); ctx.fill();
+        }
+
+        function activateAbsorb() { activePowerUpEffects.ABSORB = { timeLeft: POWER_UP_TYPES.ABSORB.duration, totalDuration: POWER_UP_TYPES.ABSORB.duration }; }
+        function deactivateAbsorb() { delete activePowerUpEffects.ABSORB; }
+        let originalSpeeds = {}; 
+        function activateSlow() {
+            activePowerUpEffects.SLOW = { timeLeft: POWER_UP_TYPES.SLOW.duration, totalDuration: POWER_UP_TYPES.SLOW.duration };
+            originalSpeeds = { minSpawn: minSpawnIntervalMs, maxSpawn: maxSpawnIntervalMs, minObs: minObstacleSpeed, maxObs: maxObstacleSpeed };
+            minSpawnIntervalMs *= 1.5; maxSpawnIntervalMs *= 1.5; 
+            minObstacleSpeed *= 0.5; maxObstacleSpeed *= 0.5;
+            obstacles.forEach(obstacle => { obstacle.speed *= 0.5; });
+        }
+        function deactivateSlow() {
+            minSpawnIntervalMs = originalSpeeds.minSpawn; maxSpawnIntervalMs = originalSpeeds.maxSpawn;
+            minObstacleSpeed = originalSpeeds.minObs; maxObstacleSpeed = originalSpeeds.maxObs;
+            delete activePowerUpEffects.SLOW;
+            obstacles.forEach(obstacle => { obstacle.speed /= 0.5; });
+        }
+        function activateHeal() { playerHP = Math.min(100, playerHP + 25); updateUIDisplay(); }
+        function activateMiniaturize() { activePowerUpEffects.MINIATURIZE = { timeLeft: POWER_UP_TYPES.MINIATURIZE.duration, totalDuration: POWER_UP_TYPES.MINIATURIZE.duration }; }
+        function deactivateMiniaturize() { delete activePowerUpEffects.MINIATURIZE; }
+        function activatePolymorph() { activePowerUpEffects.POLYMORPH = { timeLeft: POWER_UP_TYPES.POLYMORPH.duration, totalDuration: POWER_UP_TYPES.POLYMORPH.duration }; }
+        function deactivatePolymorph() { delete activePowerUpEffects.POLYMORPH; }
+
+        function formatTime(milliseconds) {
+            if (typeof milliseconds !== 'number' || isNaN(milliseconds)) return "0,00s";
+            return (milliseconds / 1000).toFixed(2).replace('.', ',') + "s";
+        }
+
+        function loadSettings() {
+            sfxOn = localStorage.getItem('sfxOn') === 'false' ? false : true;
+            soundtrackOn = localStorage.getItem('soundtrackOn') === 'false' ? false : true;
+            sfxVolume = parseFloat(localStorage.getItem('sfxVolume'));
+            if (isNaN(sfxVolume)) sfxVolume = 0.8; // Default jika NaN
+            soundtrackVolume = parseFloat(localStorage.getItem('soundtrackVolume'));
+            if (isNaN(soundtrackVolume)) soundtrackVolume = 0.3; // Default jika NaN
+
+
+            sfxToggle.textContent = sfxOn ? "ON" : "OFF";
+            sfxToggle.classList.toggle('on', sfxOn);
+            sfxToggle.classList.toggle('off', !sfxOn);
+            sfxVolumeSlider.value = sfxVolume;
+
+            soundtrackToggle.textContent = soundtrackOn ? "ON" : "OFF";
+            soundtrackToggle.classList.toggle('on', soundtrackOn);
+            soundtrackToggle.classList.toggle('off', !soundtrackOn);
+            soundtrackVolumeSlider.value = soundtrackVolume;
+            
+            applyVolumeSettings();
+            if (soundtrackOn && soundsReady && Tone.Transport.state !== "started") {
+                Tone.Transport.start();
+            } else if (!soundtrackOn && soundsReady && Tone.Transport.state === "started") {
+                Tone.Transport.pause(); 
+            }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('sfxOn', sfxOn);
+            localStorage.setItem('soundtrackOn', soundtrackOn);
+            localStorage.setItem('sfxVolume', sfxVolume);
+            localStorage.setItem('soundtrackVolume', soundtrackVolume);
+        }
+        
+        function applyVolumeSettings() {
+            if (!soundsReady) return;
+            
+            const sfxMasterVolumeDb = sfxOn ? Tone.gainToDb(sfxVolume) : -Infinity;
+            [hitSynth, gameOverSynth, clickSynth, difficultyUpSynth, deleteScoreSynth, 
+             absorbActivateSynth, slowActivateSynth, healActivateSynth, miniActivateSynth, polyActivateSynth]
+            .forEach(synth => {
+                if (synth) synth.volume.value = sfxMasterVolumeDb; // Atur volume individu jika perlu, atau biarkan master
+            });
+            // Khususnya, clickSynth mungkin ingin volume yang lebih rendah secara default
+            if(clickSynth) clickSynth.volume.value = sfxOn ? Tone.gainToDb(sfxVolume * 0.5) : -Infinity; // Click lebih pelan
+
+
+            if (soundtrackMelodySynth && soundtrackPadSynth && soundtrackBassSynth) {
+                const baseSoundtrackVol = soundtrackOn ? soundtrackVolume : 0;
+                soundtrackMelodySynth.volume.value = Tone.gainToDb(baseSoundtrackVol * 0.5); // Melodi lebih menonjol
+                soundtrackPadSynth.volume.value = Tone.gainToDb(baseSoundtrackVol * 0.25); // Pad lebih lembut
+                soundtrackBassSynth.volume.value = Tone.gainToDb(baseSoundtrackVol * 0.35); // Bass
+            }
+        }
+
+        function initialScreenSetup() {
+            mainMenuScreen.classList.add('active'); 
+            settingsScreen.classList.remove('active');
+            gameCanvas.style.display = 'none'; 
+            document.querySelector('.ui-text-container').style.display = 'none';
+            gameOverScreen.classList.remove('active'); 
+            leftControl.style.display = 'none'; rightControl.style.display = 'none'; 
+            activePowerUpUIDiv.innerHTML = ''; 
+            const storedHighScore = parseInt(localStorage.getItem('obstacleGameHighScoreTime')) || 0;
+            highScoreDisplay.textContent = `Rekor: ${formatTime(storedHighScore)}`;
+            loadSettings(); 
+        }
+
+        function showGameElements() {
+            gameCanvas.style.display = 'block'; 
+            document.querySelector('.ui-text-container').style.display = 'flex';
+            leftControl.style.display = 'block'; rightControl.style.display = 'block';
+        }
+
+        function resizeCanvas() {
+            canvas.width = gameContainer.clientWidth; canvas.height = gameContainer.clientHeight;
+            obstacleBaseRadius = canvas.width * 0.033; 
+            powerUpObjectRadius = obstacleBaseRadius * 1.5; 
+            if (!isGameOver && player) { 
+                const playerSize = canvas.width * 0.052; 
+                player.width = playerSize; player.height = playerSize;
+                player.speed = canvas.width * 0.016; 
+                player.y = canvas.height - player.height - 15; 
+                if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+                if (player.x < 0) player.x = 0;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        
+        function calculateNextObstacleSpawnFrame() {
+            const spawnDelayMs = Math.random() * (maxSpawnIntervalMs - minSpawnIntervalMs) + minSpawnIntervalMs;
+            nextObstacleSpawnFrame = frameCount + Math.round(spawnDelayMs / MS_PER_FRAME);
+        }
+
+        function initGame() {
+            if (!soundsReady) { 
+                initSounds().then(loadSettings).catch(err => console.error("Gagal inisialisasi suara otomatis:", err));
+            } else {
+                applyVolumeSettings(); // Terapkan volume saat game mulai
+                if (soundtrackOn && Tone.Transport.state !== "started") Tone.Transport.start();
+            }
+            isGameOver = false; activePowerUpEffects = {}; powerUpsOnScreen = [];
+            mainMenuScreen.classList.remove('active'); settingsScreen.classList.remove('active');
+            gameOverScreen.classList.remove('active'); 
+            showGameElements(); resizeCanvas(); 
+
+            const playerSize = canvas.width * 0.052; 
+            player = { x: canvas.width / 2 - playerSize / 2, y: canvas.height - playerSize - 15, 
+                       width: playerSize, height: playerSize, color: PLAYER_DEFAULT_COLOR, speed: canvas.width * 0.016 };
+            playerVelocityX = 0; playerHP = 100; playerHitEffectTimer = 0;
+
+            obstacles = []; currentScoreTime = 0; 
+            gameStartTime = performance.now(); lastMultiplierUpdateTime = gameStartTime;
+            minSpawnIntervalMs = 120; maxSpawnIntervalMs = 800; 
+            minObstacleSpeed = 1.3; maxObstacleSpeed = 3.2; 
+
+            frameCount = 0; calculateNextObstacleSpawnFrame();
+            Object.values(POWER_UP_TYPES).forEach(pt => {
+                pt.nextSpawnFrame = frameCount + Math.floor(Math.random() * (pt.maxSpawn - pt.minSpawn) + pt.minSpawn);
+            });
+            highScoreTime = parseInt(localStorage.getItem('obstacleGameHighScoreTime')) || 0;
+            updateUIDisplay(); 
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            gameLoop(); 
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = (playerHitEffectTimer > 0) ? PLAYER_HIT_COLOR : player.color;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 8;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+        }
+
+        function drawPolygon(x, y, radius, sides, color, rotation = 0) {
+            ctx.beginPath(); ctx.moveTo(x + radius * Math.cos(rotation), y + radius * Math.sin(rotation));
+            for (let i = 1; i < sides; i++) {
+                ctx.lineTo(x + radius * Math.cos(rotation + i * 2 * Math.PI / sides), 
+                           y + radius * Math.sin(rotation + i * 2 * Math.PI / sides));
+            }
+            ctx.closePath(); ctx.fillStyle = color; 
+            ctx.shadowColor = 'rgba(0,0,0,0.2)'; ctx.shadowBlur = 5; 
+            ctx.fill(); ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+        }
+
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                let { x, y, shapeDetails, rotation } = obstacle; 
+                let currentRadius = obstacleBaseRadius; 
+                let currentShape = shapeDetails;
+                if (activePowerUpEffects.MINIATURIZE) currentRadius /= 1.5; 
+                if (activePowerUpEffects.POLYMORPH) currentShape = OBSTACLE_SHAPES.find(s => s.type === 'circle');
+                if (currentShape.type === 'circle') {
+                    ctx.beginPath(); ctx.arc(x, y, currentRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = currentShape.color; 
+                    ctx.shadowColor = 'rgba(0,0,0,0.2)'; ctx.shadowBlur = 5;
+                    ctx.fill(); ctx.closePath(); ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+                } else {
+                    drawPolygon(x, y, currentRadius, currentShape.sides, currentShape.color, rotation);
+                }
+            });
+        }
+
+        function drawPowerUpsOnScreen() {
+            powerUpsOnScreen.forEach(pu => {
+                ctx.save(); ctx.shadowColor = 'rgba(255,255,255,0.7)'; ctx.shadowBlur = 10; 
+                POWER_UP_TYPES[pu.typeId].draw(ctx, pu.x, pu.y, powerUpObjectRadius, POWER_UP_TYPES[pu.typeId].color);
+                ctx.restore();
+            });
+        }
+
+        function updatePlayer() {
+            player.x += playerVelocityX;
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            if (playerHitEffectTimer > 0) playerHitEffectTimer--;
+        }
+        
+        function spawnObstacle() {
+            const x = Math.random() * (canvas.width - obstacleBaseRadius * 2) + obstacleBaseRadius; 
+            const y = -obstacleBaseRadius; 
+            let shapeDetails = OBSTACLE_SHAPES[Math.floor(Math.random() * OBSTACLE_SHAPES.length)];
+            let speed = Math.random() * (maxObstacleSpeed - minObstacleSpeed) + minObstacleSpeed;
+            if (activePowerUpEffects.SLOW) speed *= 0.5; 
+            obstacles.push({ x, y, speed, shapeDetails, damage: shapeDetails.damage, rotation: Math.random() * Math.PI * 2 });
+        }
+
+        function updateObstacles() {
+            obstacles.forEach((obstacle, index) => {
+                obstacle.y += obstacle.speed; 
+                let currentRadius = obstacleBaseRadius * (activePowerUpEffects.MINIATURIZE ? (1/1.5) : 1);
+                if (obstacle.y - currentRadius > canvas.height) obstacles.splice(index, 1);
+            });
+        }
+
+        function spawnPowerUp(typeId) {
+            const x = Math.random() * (canvas.width - powerUpObjectRadius * 2) + powerUpObjectRadius;
+            const y = -powerUpObjectRadius;
+            powerUpsOnScreen.push({ x, y, radius: powerUpObjectRadius, typeId, speed: 1.8 }); 
+        }
+
+        function updatePowerUpsOnScreen() {
+            powerUpsOnScreen.forEach((pu, index) => {
+                pu.y += pu.speed;
+                if (pu.y - pu.radius > canvas.height) powerUpsOnScreen.splice(index, 1);
+            });
+        }
+
+        function managePowerUpSpawning() {
+            Object.values(POWER_UP_TYPES).forEach(pt => {
+                if (frameCount >= pt.nextSpawnFrame) {
+                    spawnPowerUp(pt.id);
+                    pt.nextSpawnFrame = frameCount + Math.floor(Math.random() * (pt.maxSpawn - pt.minSpawn) + pt.minSpawn);
+                }
+            });
+        }
+        
+        function updateActivePowerUpEffects() {
+            for (const typeId in activePowerUpEffects) {
+                if (activePowerUpEffects[typeId].timeLeft > 0) {
+                    activePowerUpEffects[typeId].timeLeft--;
+                } else {
+                    if (POWER_UP_TYPES[typeId].onExpire) POWER_UP_TYPES[typeId].onExpire();
+                }
+            }
+            updateActivePowerUpUIDisplay();
+        }
+        
+        function updateActivePowerUpUIDisplay() {
+            activePowerUpUIDiv.innerHTML = ''; 
+            Object.entries(activePowerUpEffects).forEach(([typeId, effect]) => {
+                if (effect.totalDuration > 0) { 
+                    const puInfo = POWER_UP_TYPES[typeId];
+                    const percentage = (effect.timeLeft / effect.totalDuration) * 100;
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'active-powerup-info';
+                    infoDiv.style.borderColor = puInfo.color; 
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = `${puInfo.name}: `; 
+                    const barContainer = document.createElement('div');
+                    barContainer.className = 'powerup-timer-bar-container';
+                    const bar = document.createElement('div');
+                    bar.className = 'powerup-timer-bar';
+                    bar.style.width = `${percentage}%`; bar.style.backgroundColor = puInfo.color;
+                    barContainer.appendChild(bar); infoDiv.appendChild(nameSpan); infoDiv.appendChild(barContainer);
+                    activePowerUpUIDiv.appendChild(infoDiv);
+                }
+            });
+        }
+
+        function checkCollisions() {
+            obstacles.forEach((obstacle, index) => {
+                let currentObsRadius = obstacleBaseRadius * (activePowerUpEffects.MINIATURIZE ? (1/1.5) : 1);
+                let damageToDeal = obstacle.damage;
+                if (activePowerUpEffects.ABSORB) damageToDeal /= 2;
+                const distX = Math.abs(obstacle.x - player.x - player.width / 2);
+                const distY = Math.abs(obstacle.y - player.y - player.height / 2);
+                if (distX <= (player.width / 2 + currentObsRadius) && distY <= (player.height / 2 + currentObsRadius)) {
+                     if (distX <= (player.width / 2) || distY <= (player.height / 2) || 
+                        (Math.pow(distX - player.width / 2, 2) + Math.pow(distY - player.height / 2, 2) <= Math.pow(currentObsRadius, 2))) {
+                        obstacles.splice(index, 1); handleCollision(damageToDeal); return; 
+                    }
+                }
+            });
+            powerUpsOnScreen.forEach((pu, index) => {
+                const dx = player.x + player.width / 2 - pu.x;
+                const dy = player.y + player.height / 2 - pu.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < player.width / 2 + pu.radius) { 
+                    if (POWER_UP_TYPES[pu.typeId].sfxCollect && soundsReady) POWER_UP_TYPES[pu.typeId].sfxCollect();
+                    POWER_UP_TYPES[pu.typeId].onCollect(); powerUpsOnScreen.splice(index, 1);
+                }
+            });
+        }
+
+        function handleCollision(damageAmount) {
+            playerHP -= Math.round(damageAmount); playerHitEffectTimer = playerHitEffectDuration; 
+            if (sfxOn && soundsReady) hitSynth.triggerAttackRelease(0.08, Tone.now()); 
+            if (playerHP < 0) playerHP = 0; 
+            if (playerHP <= 0) gameOver();
+            updateUIDisplay();
+        }
+
+        function gameOver() {
+            isGameOver = true; cancelAnimationFrame(animationFrameId); playerVelocityX = 0; 
+            if (sfxOn && soundsReady) gameOverSynth.triggerAttackRelease("G2", "1.2n", Tone.now());
+            if (soundtrackOn && soundsReady && Tone.Transport.state === "started") Tone.Transport.pause();
+
+            Object.values(POWER_UP_TYPES).forEach(pt => { 
+                if (activePowerUpEffects[pt.id] && pt.onExpire) pt.onExpire();
+            });
+            activePowerUpEffects = {}; 
+            if (currentScoreTime > highScoreTime) {
+                highScoreTime = currentScoreTime;
+                localStorage.setItem('obstacleGameHighScoreTime', highScoreTime.toString()); 
+            }
+            finalScoreDisplay.textContent = `Waktu Bertahan: ${formatTime(currentScoreTime)}`;
+            gameOverHighScoreDisplay.textContent = `Rekor Waktu: ${formatTime(highScoreTime)}`;
+            gameOverScreen.classList.add('active'); 
+            leftControl.style.display = 'none'; rightControl.style.display = 'none';
+            activePowerUpUIDiv.innerHTML = ''; 
+        }
+
+        function updateUIDisplay() {
+            scoreDisplay.textContent = `Waktu: ${formatTime(currentScoreTime)}`;
+            highScoreDisplay.textContent = `Rekor: ${formatTime(highScoreTime)}`;
+            const hpPercentage = (playerHP / 100) * 100;
+            hpBarInner.style.width = `${hpPercentage}%`;
+            if (hpPercentage > 60) hpBarInner.style.backgroundColor = '#4CAF50'; 
+            else if (hpPercentage > 30) hpBarInner.style.backgroundColor = '#FFC107'; 
+            else hpBarInner.style.backgroundColor = '#F44336'; 
+        }
+
+        function updateDifficulty() {
+            const currentTime = performance.now();
+            if ((currentTime - lastMultiplierUpdateTime) / 1000 >= 20) { 
+                if (!activePowerUpEffects.SLOW) { 
+                    minSpawnIntervalMs = Math.max(30, minSpawnIntervalMs / 1.1); 
+                    maxSpawnIntervalMs = Math.max(100, maxSpawnIntervalMs / 1.1); 
+                    if (minSpawnIntervalMs >= maxSpawnIntervalMs) maxSpawnIntervalMs = minSpawnIntervalMs + 70; 
+                    minObstacleSpeed *= 1.075; maxObstacleSpeed *= 1.075; 
+                    if (sfxOn && soundsReady) difficultyUpSynth.triggerAttackRelease("C6", "32n", Tone.now());
+                }
+                lastMultiplierUpdateTime = currentTime;
+            }
+        }
+
+        function gameLoop() {
+            if (isGameOver) return;
+            const currentTime = performance.now();
+            currentScoreTime = currentTime - gameStartTime; 
+            frameCount++; 
+            updateDifficulty(); updateActivePowerUpEffects(); managePowerUpSpawning();
+            if (frameCount >= nextObstacleSpawnFrame) { spawnObstacle(); calculateNextObstacleSpawnFrame(); }
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            updatePlayer(); updateObstacles(); updatePowerUpsOnScreen();
+            drawObstacles(); drawPowerUpsOnScreen(); drawPlayer();
+            checkCollisions(); updateUIDisplay(); 
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function moveLeft() { if (!isGameOver) playerVelocityX = -player.speed; }
+        function moveRight() { if (!isGameOver) playerVelocityX = player.speed; }
+        function stopMovement() { playerVelocityX = 0; }
+
+        settingsButton.addEventListener('click', () => {
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+            mainMenuScreen.classList.remove('active');
+            settingsScreen.classList.add('active');
+        });
+
+        backToMenuButton.addEventListener('click', () => {
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+            settingsScreen.classList.remove('active');
+            mainMenuScreen.classList.add('active');
+            saveSettings(); 
+        });
+
+        soundtrackToggle.addEventListener('click', () => {
+            soundtrackOn = !soundtrackOn;
+            soundtrackToggle.textContent = soundtrackOn ? "ON" : "OFF";
+            soundtrackToggle.classList.toggle('on', soundtrackOn);
+            soundtrackToggle.classList.toggle('off', !soundtrackOn);
+            if (soundtrackOn && soundsReady && Tone.Transport.state !== "started") {
+                Tone.Transport.start();
+            } else if (!soundtrackOn && soundsReady && Tone.Transport.state === "started") {
+                Tone.Transport.pause();
+            }
+            applyVolumeSettings();
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("E4", "16n", Tone.now());
+        });
+
+        soundtrackVolumeSlider.addEventListener('input', (e) => {
+            soundtrackVolume = parseFloat(e.target.value);
+            applyVolumeSettings();
+        });
+        soundtrackVolumeSlider.addEventListener('change', saveSettings); // Simpan saat selesai geser
+
+        sfxToggle.addEventListener('click', () => {
+            sfxOn = !sfxOn;
+            sfxToggle.textContent = sfxOn ? "ON" : "OFF";
+            sfxToggle.classList.toggle('on', sfxOn);
+            sfxToggle.classList.toggle('off', !sfxOn);
+            applyVolumeSettings();
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("D4", "16n", Tone.now());
+        });
+
+        sfxVolumeSlider.addEventListener('input', (e) => {
+            sfxVolume = parseFloat(e.target.value);
+            applyVolumeSettings();
+        });
+        sfxVolumeSlider.addEventListener('change', saveSettings); // Simpan saat selesai geser
+        
+        deleteHighScoreButton.addEventListener('click', () => {
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("A3", "8n", Tone.now());
+            confirmDeleteModal.style.display = 'flex';
+        });
+
+        confirmDeleteYes.addEventListener('click', () => {
+            if (sfxOn && soundsReady) deleteScoreSynth.triggerAttackRelease(0.15, Tone.now());
+            localStorage.removeItem('obstacleGameHighScoreTime');
+            highScoreTime = 0;
+            // Update tampilan rekor di semua tempat yang relevan
+            updateUIDisplay(); // Jika game sedang berjalan (tidak mungkin dari sini)
+            highScoreDisplay.textContent = `Rekor: ${formatTime(highScoreTime)}`; 
+            if (gameOverScreen.classList.contains('active')) { // Jika layar game over aktif
+                 gameOverHighScoreDisplay.textContent = `Rekor Waktu: ${formatTime(highScoreTime)}`;
+            }
+            confirmDeleteModal.style.display = 'none';
+        });
+
+        confirmDeleteNo.addEventListener('click', () => {
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C3", "16n", Tone.now());
+            confirmDeleteModal.style.display = 'none';
+        });
+
+
+        startGameButton.addEventListener('click', () => {
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+            else if (!soundsReady) { 
+                initSounds().then(() => {
+                    loadSettings(); 
+                    if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+                }).catch(err => console.error("Gagal inisialisasi suara saat klik:", err));
+            }
+            initGame();
+        }); 
+        restartButton.addEventListener('click', () => {
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+            initGame();
+        }); 
+        leftControl.addEventListener('mousedown', moveLeft);
+        leftControl.addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); }, { passive: false }); 
+        rightControl.addEventListener('mousedown', moveRight);
+        rightControl.addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); }, { passive: false });
+        document.addEventListener('mouseup', stopMovement);
+        document.addEventListener('touchend', stopMovement);
+        document.addEventListener('touchcancel', stopMovement); 
+        
+        initialScreenSetup();
+    </script>
+</body>
+</html>
+
