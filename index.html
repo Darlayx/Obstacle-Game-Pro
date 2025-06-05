@@ -24,10 +24,13 @@
             width: 90vw; 
             max-width: 650px; 
             aspect-ratio: 9 / 18; 
-            background-color: rgba(255, 255, 255, 0.95); 
+            /* background-color: rgba(255, 255, 255, 0.95);  Original */
+            background-color: #F8F9FA; /* Slightly off-white, more opaque */
             border-radius: 24px; 
-            box-shadow: 0 20px 45px rgba(0,0,0,0.25); 
+            /* box-shadow: 0 20px 45px rgba(0,0,0,0.25); Original */
+            box-shadow: 0 12px 28px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1); /* Softer, layered shadow */
             overflow: hidden; 
+            border: 1px solid rgba(0,0,0,0.05); /* Subtle border */
         }
         canvas {
             display: block;
@@ -58,9 +61,13 @@
             font-weight: 600;
             padding: 6px 10px; 
             border-radius: 8px; 
-            background-color: rgba(255, 255, 255, 0.8); 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+            /* background-color: rgba(255, 255, 255, 0.8); Original */
+            background-color: rgba(245, 245, 245, 0.88); /* Slightly different white, more opaque */
+            /* box-shadow: 0 2px 5px rgba(0,0,0,0.07); Original */
+            box-shadow: 0 3px 7px rgba(0,0,0,0.12); /* Slightly deeper shadow */
             text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(3px); /* Add a slight blur to the background behind it */
         }
         #hpContainer.ui-element, #score.ui-element {
             font-size: clamp(11px, 2.2vw, 14px); 
@@ -190,12 +197,69 @@
         .settings-group { margin-bottom: 20px; width: 100%; }
         .settings-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: clamp(13px, 2.8vw, 16px); }
         .settings-control { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .settings-control input[type="range"] { flex-grow: 1; cursor: pointer; -webkit-appearance: none; appearance: none; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; outline: none;}
-        .settings-control input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; background: #fff; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        .settings-control input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; background: #fff; border-radius: 50%; cursor: pointer; border:none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        .toggle-button { padding: 8px 15px; font-size: clamp(12px, 2.5vw, 14px); }
-        .toggle-button.on { background-color: #4CAF50; }
-        .toggle-button.off { background-color: #f44336; }
+        
+        /* Custom Range Slider Styles */
+        .settings-control input[type="range"] {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%; 
+            height: 10px; 
+            background: #4A5568; /* Tailwind gray-700 equivalent */
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity .15s ease-in-out;
+            cursor: pointer;
+        }
+        .settings-control input[type="range"]:hover {
+            opacity: 1;
+        }
+        .settings-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px; 
+            height: 20px; 
+            background: #E2E8F0; /* Tailwind gray-200 equivalent */
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #2D3748; /* Tailwind gray-800 equivalent */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .settings-control input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #E2E8F0;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #2D3748;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-button { /* Updated styles */
+            padding: 10px 18px; 
+            font-size: clamp(13px, 2.8vw, 15px);
+            font-weight: 500; 
+            border: none;
+            border-radius: 8px; 
+            cursor: pointer;
+            transition: background-color 0.2s ease-out, transform 0.1s ease-out, box-shadow 0.2s ease-out;
+            min-width: 70px; 
+            text-align: center;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .toggle-button.on {
+            background-color: #48BB78; /* Tailwind green-500 */
+        }
+        .toggle-button.off {
+            background-color: #F56565; /* Tailwind red-500 */
+        }
+        .toggle-button:hover {
+            transform: translateY(-1.5px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+
 
         #confirmDeleteModal {
             position: fixed; 
@@ -213,6 +277,21 @@
         }
         #confirmDeleteModal p { font-size: clamp(14px, 3vw, 17px); margin-bottom: 20px; }
         .confirm-buttons { display: flex; justify-content: space-around; gap: 10px; }
+        
+        /* New classes for modal buttons */
+        .modal-button-delete {
+            background: linear-gradient(45deg, #E53E3E, #FC8181) !important; 
+        }
+        .modal-button-delete:hover {
+            background: linear-gradient(45deg, #C53030, #F56565) !important; 
+        }
+        .modal-button-cancel {
+            background: linear-gradient(45deg, #718096, #A0AEC0) !important;
+        }
+        .modal-button-cancel:hover {
+            background: linear-gradient(45deg, #4A5568, #718096) !important;
+        }
+
 
         #leftControl, #rightControl {
             position: absolute; top: 0; width: 50%; height: 100%;
@@ -251,8 +330,8 @@
         <div id="confirmDeleteModal">
             <p>Apakah Anda yakin ingin menghapus rekor waktu tertinggi?</p>
             <div class="confirm-buttons">
-                <button id="confirmDeleteYes" class="screen-button" style="background-color: #D32F2F;">Ya, Hapus</button>
-                <button id="confirmDeleteNo" class="screen-button" style="background-color: #757575;">Batal</button>
+                <button id="confirmDeleteYes" class="screen-button modal-button-delete">Ya, Hapus</button>
+                <button id="confirmDeleteNo" class="screen-button modal-button-cancel">Batal</button>
             </div>
         </div>
 
@@ -326,35 +405,14 @@
                 noise: { type: "white" }, 
                 envelope: { attack: 0.01, decay: 0.1, sustain: 0 } 
             }).connect(globalReverb);
-
-            // --- Power-up SFX Definitions ---
-            // PERBAIKAN SFX ABSORB:
-            absorbActivateSynth = new Tone.Synth({
-                oscillator: { type: "sine" }, // Gelombang sine lembut
-                volume: -6, // Sedikit lebih pelan secara inheren
-                envelope: { // Amplop utama
-                    attack: 0.01,
-                    decay: 0.35, // Durasi suara keseluruhan
-                    sustain: 0.05,
-                    release: 0.2
-                },
-                filter: { // Jenis filter
-                    type: "lowpass",
-                    Q: 1.2, // Sedikit resonansi untuk membantu sweep terdengar
-                    rolloff: -24 // Cutoff yang lebih curam
-                },
-                filterEnvelope: { // Mengontrol frekuensi cutoff filter dari waktu ke waktu
-                    attack: 0.005,  // Attack filter sangat cepat untuk membukanya
-                    decay: 0.3,    // Filter menyapu dari terbuka ke 'baseFrequency + sustain_offset'
-                    sustain: 0.1,   // Level sustain untuk filter (relatif terhadap puncak).
-                    release: 0.15,   // Release filter
-                    baseFrequency: 150, // Frekuensi terendah yang akan dicapai filter (hampir tertutup)
-                    octaves: 4.5      // Berapa oktaf *di atas* baseFrequency filter akan menyapu
-                                    // Pada puncak attack, cutoff = baseFrequency * (2^octaves)
-                                    // Kemudian meluruh menuju baseFrequency
-                }
+            
+            absorbActivateSynth = new Tone.Synth({ // Defined with its original characteristics
+                oscillator: { type: "sine" },
+                volume: -6, // This is its base volume relative to a '0dB' full scale for the synth.
+                envelope: { attack: 0.01, decay: 0.35, sustain: 0.05, release: 0.2 },
+                filter: { type: "lowpass", Q: 1.2, rolloff: -24 },
+                filterEnvelope: { attack: 0.005,  decay: 0.3, sustain: 0.1, release: 0.15, baseFrequency: 150, octaves: 4.5 }
             }).connect(globalReverb);
-
 
             slowActivateSynth = new Tone.Synth({ 
                 oscillator: { type: "triangle" },
@@ -448,9 +506,8 @@
         const POWER_UP_TYPES = {
             ABSORB: { id: 'ABSORB', name: 'Absorb', color: '#48C9B0', draw: drawAbsorbShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 60 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateAbsorb, onExpire: deactivateAbsorb,
                 sfxCollect: () => { if(sfxOn && soundsReady) {
-                    // Nada yang dimainkan G3 (sekitar 196 Hz) atau A3 (sekitar 220Hz)
-                    // Filter akan mulai terbuka tinggi (sekitar 150 * 2^4.5 Hz) dan menyapu ke bawah menuju 150 Hz.
-                    absorbActivateSynth.triggerAttackRelease("G3", "0.35s", Tone.now(), 0.7); 
+                    // Velocity increased to 1.0 for louder sound, actual volume adjusted in applyVolumeSettings
+                    absorbActivateSynth.triggerAttackRelease("G3", "0.35s", Tone.now(), 1.0); 
                 }} 
             },
             SLOW: { id: 'SLOW', name: 'Slow', color: '#5499C7', draw: drawSlowShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 90 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateSlow, onExpire: deactivateSlow,
@@ -576,20 +633,35 @@
         function applyVolumeSettings() {
             if (!soundsReady) return;
             
-            const sfxMasterVolumeDb = sfxOn ? Tone.gainToDb(sfxVolume) : -Infinity;
-             [hitSynth, gameOverSynth, difficultyUpSynth, deleteScoreSynth, 
-             absorbActivateSynth, slowActivateSynth, healActivateSynth, miniActivateSynth, polyActivateSynth]
+            const sfxMasterGain = sfxOn ? sfxVolume : 0;
+            const sfxMasterVolumeDb = Tone.gainToDb(sfxMasterGain);
+
+            // General synths controlled directly by sfxMasterVolumeDb
+            [hitSynth, gameOverSynth, difficultyUpSynth, deleteScoreSynth, 
+             slowActivateSynth, healActivateSynth, miniActivateSynth, polyActivateSynth]
             .forEach(synth => {
-                // Periksa apakah synth dan properti volume ada sebelum Mengaturnya
                 if (synth && typeof synth.volume !== 'undefined' && typeof synth.volume.value !== 'undefined') {
-                     // Jika synth memiliki volume yang ditetapkan secara internal (misalnya, absorbActivateSynth.volume = -6),
-                     // kita mungkin ingin sfxMasterVolumeDb ditambahkan ke itu, bukan menimpanya.
-                     // Namun, untuk kesederhanaan, kita akan menimpanya, yang berarti volume internal hanyalah default awal.
                     synth.volume.value = sfxMasterVolumeDb;
                 }
             });
+
+            // Absorb synth: Apply master volume and then add a boost
+            if (absorbActivateSynth && typeof absorbActivateSynth.volume !== 'undefined' && typeof absorbActivateSynth.volume.value !== 'undefined') {
+                if (sfxOn) {
+                    const baseAbsorbVolumeDb = -6; // Its inherent volume defined at creation
+                    const absorbVolumeBoostDb = 6;  // Boost to make it louder relative to its original setting
+                                                    // Final volume relative to other sounds effectively becomes baseAbsorbVolumeDb + absorbVolumeBoostDb, then scaled by sfxVolume.
+                                                    // A more direct approach: Set it relative to sfxMasterVolumeDb.
+                                                    // Let's make absorb +5dB louder than other effects.
+                    absorbActivateSynth.volume.value = sfxMasterVolumeDb + 5; // +5dB relative to other sounds
+                } else {
+                    absorbActivateSynth.volume.value = -Infinity;
+                }
+            }
+            
+            // Click synth (usually quieter)
             if(clickSynth && typeof clickSynth.volume !== 'undefined' && typeof clickSynth.volume.value !== 'undefined') {
-                clickSynth.volume.value = sfxOn ? Tone.gainToDb(sfxVolume * 0.3) : -Infinity; 
+                clickSynth.volume.value = sfxOn ? Tone.gainToDb(sfxVolume * 0.4) : -Infinity; // Slightly increased click volume too
             }
         }
 
@@ -685,16 +757,21 @@
             obstacles.forEach(obstacle => {
                 let { x, y, shapeDetails, rotation } = obstacle; 
                 let currentRadius = obstacleBaseRadius; 
-                let currentShape = shapeDetails;
+                let currentShapeToDraw = shapeDetails; // Shape for drawing
+                
                 if (activePowerUpEffects.MINIATURIZE) currentRadius /= 1.5; 
-                if (activePowerUpEffects.POLYMORPH) currentShape = OBSTACLE_SHAPES.find(s => s.type === 'circle');
-                if (currentShape.type === 'circle') {
+                if (activePowerUpEffects.POLYMORPH) {
+                     // Visually, all obstacles become circles during Polymorph
+                    currentShapeToDraw = OBSTACLE_SHAPES.find(s => s.type === 'circle');
+                }
+
+                if (currentShapeToDraw.type === 'circle') {
                     ctx.beginPath(); ctx.arc(x, y, currentRadius, 0, Math.PI * 2);
-                    ctx.fillStyle = currentShape.color; 
+                    ctx.fillStyle = currentShapeToDraw.color; 
                     ctx.shadowColor = 'rgba(0,0,0,0.2)'; ctx.shadowBlur = 5;
                     ctx.fill(); ctx.closePath(); ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
                 } else {
-                    drawPolygon(x, y, currentRadius, currentShape.sides, currentShape.color, rotation);
+                    drawPolygon(x, y, currentRadius, currentShapeToDraw.sides, currentShapeToDraw.color, rotation);
                 }
             });
         }
@@ -720,7 +797,8 @@
             let shapeDetails = OBSTACLE_SHAPES[Math.floor(Math.random() * OBSTACLE_SHAPES.length)];
             let speed = Math.random() * (maxObstacleSpeed - minObstacleSpeed) + minObstacleSpeed;
             if (activePowerUpEffects.SLOW) speed *= 0.5; 
-            obstacles.push({ x, y, speed, shapeDetails, damage: shapeDetails.damage, rotation: Math.random() * Math.PI * 2 });
+            // Store original shape details and damage
+            obstacles.push({ x, y, speed, shapeDetails: shapeDetails, damage: shapeDetails.damage, rotation: Math.random() * Math.PI * 2 });
         }
 
         function updateObstacles() {
@@ -789,8 +867,20 @@
         function checkCollisions() {
             obstacles.forEach((obstacle, index) => {
                 let currentObsRadius = obstacleBaseRadius * (activePowerUpEffects.MINIATURIZE ? (1/1.5) : 1);
-                let damageToDeal = obstacle.damage;
-                if (activePowerUpEffects.ABSORB) damageToDeal /= 2;
+                
+                // Determine damage based on Polymorph status
+                let damageToDeal = obstacle.damage; // Original damage from obstacle.shapeDetails.damage
+                if (activePowerUpEffects.POLYMORPH) {
+                    const circleShapeData = OBSTACLE_SHAPES.find(s => s.type === 'circle');
+                    if (circleShapeData) {
+                        damageToDeal = circleShapeData.damage; // Damage is now based on the circle shape
+                    }
+                }
+
+                if (activePowerUpEffects.ABSORB) {
+                    damageToDeal /= 2; // Absorb applies to the currently determined damage
+                }
+
                 const distX = Math.abs(obstacle.x - player.x - player.width / 2);
                 const distY = Math.abs(obstacle.y - player.y - player.height / 2);
                 if (distX <= (player.width / 2 + currentObsRadius) && distY <= (player.height / 2 + currentObsRadius)) {
@@ -956,4 +1046,3 @@
     </script>
 </body>
 </html>
-
