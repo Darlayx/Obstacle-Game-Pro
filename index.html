@@ -214,7 +214,6 @@
         #confirmDeleteModal p { font-size: clamp(14px, 3vw, 17px); margin-bottom: 20px; }
         .confirm-buttons { display: flex; justify-content: space-around; gap: 10px; }
 
-
         #leftControl, #rightControl {
             position: absolute; top: 0; width: 50%; height: 100%;
             cursor: pointer;  z-index: 1; 
@@ -237,13 +236,6 @@
         <div id="settingsScreen" class="screen-overlay">
             <h2>Pengaturan</h2>
             <div class="settings-group">
-                <label for="soundtrackVolume">Volume Soundtrack:</label>
-                <div class="settings-control">
-                    <input type="range" id="soundtrackVolume" min="0" max="1" step="0.01" value="0.5">
-                    <button id="soundtrackToggle" class="screen-button toggle-button on">ON</button>
-                </div>
-            </div>
-            <div class="settings-group">
                 <label for="sfxVolume">Volume Efek Suara:</label>
                 <div class="settings-control">
                     <input type="range" id="sfxVolume" min="0" max="1" step="0.01" value="0.8">
@@ -263,7 +255,6 @@
                 <button id="confirmDeleteNo" class="screen-button" style="background-color: #757575;">Batal</button>
             </div>
         </div>
-
 
         <canvas id="gameCanvas"></canvas>
         
@@ -295,93 +286,105 @@
     </div>
 
     <script>
-        // --- Tone.js Sound Synthesizers & Soundtrack ---
+        // --- Tone.js Sound Synthesizers ---
         let hitSynth, gameOverSynth, clickSynth, difficultyUpSynth, deleteScoreSynth;
         let absorbActivateSynth, slowActivateSynth, healActivateSynth, miniActivateSynth, polyActivateSynth;
-        // PERUBAHAN 3: Soundtrack Synths
-        let soundtrackMelodySynth, soundtrackPadSynth, soundtrackBassSynth;
-        let soundtrackMelodyLoop, soundtrackPadLoop, soundtrackBassLoop;
         let globalReverb;
 
         let soundsReady = false;
         let sfxOn = true; 
-        let soundtrackOn = true; 
         let sfxVolume = 0.8; 
-        let soundtrackVolume = 0.3; 
 
         async function initSounds() {
             await Tone.start(); 
             
-            globalReverb = new Tone.Reverb(2.5).toDestination(); // Reverb lebih panjang
-            globalReverb.wet.value = 0.25; // Wetness disesuaikan
+            globalReverb = new Tone.Reverb(1.5).toDestination();
+            globalReverb.wet.value = 0.2; 
 
-            hitSynth = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0 } }).connect(globalReverb);
-            gameOverSynth = new Tone.MonoSynth({ oscillator: { type: "fatsawtooth", count:3 }, envelope: { attack: 0.1, decay: 1, sustain: 0.2, release: 2 }, filterEnvelope: { attack: 0.1, decay: 0.5, sustain: 1, release: 2, baseFrequency: 150, octaves: 3 } }).connect(globalReverb);
-            clickSynth = new Tone.MembraneSynth({ pitchDecay: 0.008, octaves: 2.5, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).toDestination(); // Click tidak perlu reverb banyak
-            difficultyUpSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.002, decay: 0.05, sustain: 0, release: 0.08 } }).connect(globalReverb);
-            deleteScoreSynth = new Tone.NoiseSynth({ noise: { type: "white" }, envelope: { attack: 0.01, decay: 0.15, sustain: 0 } }).connect(globalReverb);
-
-            absorbActivateSynth = new Tone.Synth({ oscillator: {type: "amsine", harmonicity: 1.2, modulationType: "sawtooth"}, envelope: {attack: 0.08, decay: 0.4, sustain:0.1, release: 0.3} }).connect(globalReverb);
-            slowActivateSynth = new Tone.Synth({ oscillator: {type: "fmsine", modulationType: "sine", harmonicity: 0.8, modulationIndex: 8}, envelope: {attack: 0.4, decay: 0.6, sustain:0.3, release: 1.2} }).connect(globalReverb);
-            healActivateSynth = new Tone.Synth({ oscillator: { type: 'sine' }, detune: 5, envelope: { attack: 0.02, decay: 0.5, sustain: 0.3, release: 0.6 } }).connect(globalReverb);
-            // PERUBAHAN 2: SFX Miniaturize
-            miniActivateSynth = new Tone.PluckSynth({ attackNoise: 0.1, dampening: 6000, resonance: 0.9, release: 0.3 }).connect(globalReverb);
-            polyActivateSynth = new Tone.PolySynth(Tone.Synth, { oscillator: {type: "fatsquare", spread: 20}, envelope: {attack: 0.08, decay: 0.3, sustain:0.4, release: 0.4} }).connect(globalReverb);
-            
-            // PERUBAHAN 3: Enhanced Soundtrack
-            soundtrackMelodySynth = new Tone.Synth({
-                oscillator: { type: "fmsine", harmonicity: 1.1, modulationIndex: 4, detune: -5 },
-                envelope: { attack: 0.2, decay: 0.5, sustain: 0.4, release: 1.5 },
-                portamento: 0.08
+            hitSynth = new Tone.NoiseSynth({ 
+                noise: { type: 'pink' }, 
+                envelope: { attack: 0.005, decay: 0.08, sustain: 0 } 
             }).connect(globalReverb);
 
-            soundtrackPadSynth = new Tone.PolySynth(Tone.FMSynth, {
-                harmonicity: 0.7, modulationIndex: 1.5,
-                detune: 3,
-                oscillator: {type: "triangle"},
-                envelope: { attack: 2, decay: 1.5, sustain: 1, release: 3 },
-                modulationEnvelope: { attack: 1.8, decay: 1, sustain: 0.8, release: 2.5 }
-            }).connect(globalReverb);
-            
-            soundtrackBassSynth = new Tone.MonoSynth({
-                oscillator : { type : "fmsquare", modulationType: "sine", harmonicity: 0.5, modulationIndex: 2},
-                envelope : { attack : 0.1, decay : 0.2, sustain : 0.3, release: 0.8 },
-                filterEnvelope : { attack : 0.05, decay : 0.1, sustain : 0.2, release: 0.5, baseFrequency : 80, octaves : 2.5 }
+            gameOverSynth = new Tone.MonoSynth({ 
+                oscillator: { type: "sawtooth" }, 
+                envelope: { attack: 0.1, decay: 0.8, sustain: 0.1, release: 1.5 }, 
+                filterEnvelope: { attack: 0.1, decay: 0.4, sustain: 0.8, release: 1.5, baseFrequency: 180, octaves: 2.5 } 
             }).connect(globalReverb);
 
+            clickSynth = new Tone.MembraneSynth({ 
+                pitchDecay: 0.01, octaves: 2, 
+                envelope: { attack: 0.001, decay: 0.08, sustain: 0 } 
+            }).toDestination(); 
 
-            const melodyPattern = [
-                { time: "0:0:0", note: "C4", duration: "1m" },
-                { time: "1:0:0", note: "G4", duration: "2n" },
-                { time: "1:2:0", note: "E4", duration: "2n" },
-                { time: "2:0:0", note: "A4", duration: "1m" },
-                { time: "3:0:0", note: "F4", duration: "2n" },
-                { time: "3:2:0", note: "D4", duration: "2n" }
-            ];
-            const padChords = [
-                { time: "0:0:0", note: ["C3", "G3", "C4"], duration: "2m" }, // Cmaj7-ish
-                { time: "2:0:0", note: ["A2", "E3", "A3"], duration: "2m" }  // Amin7-ish
-            ];
-            const bassPattern = [
-                { time: "0:0:0", note: "C2", duration: "1n"},
-                { time: "0:2:0", note: "G2", duration: "1n"},
-                { time: "1:0:0", note: "A2", duration: "1n"},
-                { time: "1:2:0", note: "E2", duration: "1n"},
-                { time: "2:0:0", note: "F2", duration: "1n"},
-                { time: "2:2:0", note: "C2", duration: "1n"},
-                { time: "3:0:0", note: "D2", duration: "2n"},
-                { time: "3:2:0", note: "G1", duration: "2n"},
-            ];
-
-            soundtrackMelodyLoop = new Tone.Part((time, value) => { soundtrackMelodySynth.triggerAttackRelease(value.note, value.duration, time); }, melodyPattern).start(0);
-            soundtrackPadLoop = new Tone.Part((time, value) => { soundtrackPadSynth.triggerAttackRelease(value.note, value.duration, time); }, padChords).start(0);
-            soundtrackBassLoop = new Tone.Part((time, value) => { soundtrackBassSynth.triggerAttackRelease(value.note, value.duration, time); }, bassPattern).start(0);
+            difficultyUpSynth = new Tone.Synth({ 
+                oscillator: { type: 'sine' }, 
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.15 }
+            }).connect(globalReverb);
             
-            [soundtrackMelodyLoop, soundtrackPadLoop, soundtrackBassLoop].forEach(loop => {
-                loop.loop = true; loop.loopEnd = "4m";
-            });
-            Tone.Transport.bpm.value = 68; 
+            deleteScoreSynth = new Tone.NoiseSynth({ 
+                noise: { type: "white" }, 
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0 } 
+            }).connect(globalReverb);
 
+            // --- Power-up SFX Definitions ---
+            // PERBAIKAN SFX ABSORB:
+            absorbActivateSynth = new Tone.Synth({
+                oscillator: { type: "sine" }, // Gelombang sine lembut
+                volume: -6, // Sedikit lebih pelan secara inheren
+                envelope: { // Amplop utama
+                    attack: 0.01,
+                    decay: 0.35, // Durasi suara keseluruhan
+                    sustain: 0.05,
+                    release: 0.2
+                },
+                filter: { // Jenis filter
+                    type: "lowpass",
+                    Q: 1.2, // Sedikit resonansi untuk membantu sweep terdengar
+                    rolloff: -24 // Cutoff yang lebih curam
+                },
+                filterEnvelope: { // Mengontrol frekuensi cutoff filter dari waktu ke waktu
+                    attack: 0.005,  // Attack filter sangat cepat untuk membukanya
+                    decay: 0.3,    // Filter menyapu dari terbuka ke 'baseFrequency + sustain_offset'
+                    sustain: 0.1,   // Level sustain untuk filter (relatif terhadap puncak).
+                    release: 0.15,   // Release filter
+                    baseFrequency: 150, // Frekuensi terendah yang akan dicapai filter (hampir tertutup)
+                    octaves: 4.5      // Berapa oktaf *di atas* baseFrequency filter akan menyapu
+                                    // Pada puncak attack, cutoff = baseFrequency * (2^octaves)
+                                    // Kemudian meluruh menuju baseFrequency
+                }
+            }).connect(globalReverb);
+
+
+            slowActivateSynth = new Tone.Synth({ 
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.1, decay: 0.8, sustain: 0.2, release: 1.0 }, 
+                detune: -10 
+            }).connect(globalReverb);
+
+            healActivateSynth = new Tone.FMSynth({ 
+                harmonicity: 1.5,
+                modulationIndex: 3,
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.01, decay: 0.4, sustain: 0.1, release: 0.5 },
+                modulation: { type: "triangle" },
+                modulationEnvelope: { attack: 0.02, decay: 0.2, sustain: 0, release: 0.3 }
+            }).connect(globalReverb);
+
+            miniActivateSynth = new Tone.PluckSynth({ 
+                attackNoise: 0.2,
+                dampening: 7000, 
+                resonance: 0.95,
+                release: 0.1 
+            }).connect(globalReverb);
+            
+            polyActivateSynth = new Tone.PolySynth(Tone.Synth, { 
+                volume: -6, 
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.05, decay: 0.3, sustain: 0.4, release: 0.4 },
+                portamento: 0.05 
+            }).connect(globalReverb);
+            
             applyVolumeSettings(); 
             soundsReady = true;
             console.log("Sound system initialized.");
@@ -394,8 +397,6 @@
         const startGameButton = document.getElementById('startGameButton');
         const settingsButton = document.getElementById('settingsButton'); 
         const settingsScreen = document.getElementById('settingsScreen'); 
-        const soundtrackVolumeSlider = document.getElementById('soundtrackVolume');
-        const soundtrackToggle = document.getElementById('soundtrackToggle');
         const sfxVolumeSlider = document.getElementById('sfxVolume');
         const sfxToggle = document.getElementById('sfxToggle');
         const deleteHighScoreButton = document.getElementById('deleteHighScoreButton'); 
@@ -446,18 +447,36 @@
         
         const POWER_UP_TYPES = {
             ABSORB: { id: 'ABSORB', name: 'Absorb', color: '#48C9B0', draw: drawAbsorbShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 60 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateAbsorb, onExpire: deactivateAbsorb,
-                sfxCollect: () => { if(sfxOn && soundsReady) absorbActivateSynth.triggerAttackRelease("G3", "0.15n", Tone.now()); } },
+                sfxCollect: () => { if(sfxOn && soundsReady) {
+                    // Nada yang dimainkan G3 (sekitar 196 Hz) atau A3 (sekitar 220Hz)
+                    // Filter akan mulai terbuka tinggi (sekitar 150 * 2^4.5 Hz) dan menyapu ke bawah menuju 150 Hz.
+                    absorbActivateSynth.triggerAttackRelease("G3", "0.35s", Tone.now(), 0.7); 
+                }} 
+            },
             SLOW: { id: 'SLOW', name: 'Slow', color: '#5499C7', draw: drawSlowShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 90 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateSlow, onExpire: deactivateSlow,
-                sfxCollect: () => { if(sfxOn && soundsReady) slowActivateSynth.triggerAttackRelease("D2", "0.5n", Tone.now()); } },
+                sfxCollect: () => { if(sfxOn && soundsReady) {
+                    slowActivateSynth.triggerAttack("G2", Tone.now()); 
+                    slowActivateSynth.frequency.rampTo("F#2", 0.5, Tone.now() + 0.1); 
+                    slowActivateSynth.triggerRelease(Tone.now() + 0.6);
+                }}
+            },
             HEAL: { id: 'HEAL', name: 'Heal', color: '#2ECC71', draw: drawHealShape, duration: 0, minSpawn: 10 * TARGET_FPS, maxSpawn: 25 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateHeal,
-                sfxCollect: () => { if(sfxOn && soundsReady) { healActivateSynth.triggerAttackRelease("B4", "8n", Tone.now()); healActivateSynth.triggerAttackRelease("F#5", "16n", Tone.now() + 0.1); } } },
+                sfxCollect: () => { if(sfxOn && soundsReady) { 
+                    healActivateSynth.triggerAttackRelease("C5", "0.4s", Tone.now(), 0.8); 
+                    healActivateSynth.triggerAttackRelease("G5", "0.4s", Tone.now() + 0.15, 0.7); 
+                }}
+            },
             MINIATURIZE: { id: 'MINIATURIZE', name: 'Mini', color: '#A569BD', draw: drawMiniaturizeShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 120 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activateMiniaturize, onExpire: deactivateMiniaturize,
-                sfxCollect: () => { if(sfxOn && soundsReady) { // Lebih "tinkling" dan pendek
-                    miniActivateSynth.triggerAttackRelease("A6", "0.05s", Tone.now());
-                    miniActivateSynth.triggerAttackRelease("E7", "0.05s", Tone.now() + 0.04);
-                } } },
+                sfxCollect: () => { if(sfxOn && soundsReady) { 
+                    miniActivateSynth.triggerAttackRelease("A6", "0.05s", Tone.now(), 0.7); 
+                    miniActivateSynth.triggerAttackRelease("D7", "0.05s", Tone.now() + 0.04, 0.6);
+                }}
+            },
             POLYMORPH: { id: 'POLYMORPH', name: 'Poly', color: '#5D6D7E', draw: drawPolymorphShape, duration: 20 * TARGET_FPS, minSpawn: 20 * TARGET_FPS, maxSpawn: 150 * TARGET_FPS, nextSpawnFrame: 0, onCollect: activatePolymorph, onExpire: deactivatePolymorph,
-                sfxCollect: () => { if(sfxOn && soundsReady) polyActivateSynth.triggerAttackRelease(["D4", "F#4", "A4"], "0.25n", Tone.now()); } }
+                sfxCollect: () => { if(sfxOn && soundsReady) {
+                    polyActivateSynth.triggerAttackRelease(["C4", "Eb4", "G4", "Bb4"], "0.3s", Tone.now()); 
+                }}
+            }
         };
         
         function drawAbsorbShape(ctx, x, y, radius, color) { 
@@ -538,56 +557,39 @@
 
         function loadSettings() {
             sfxOn = localStorage.getItem('sfxOn') === 'false' ? false : true;
-            soundtrackOn = localStorage.getItem('soundtrackOn') === 'false' ? false : true;
             sfxVolume = parseFloat(localStorage.getItem('sfxVolume'));
-            if (isNaN(sfxVolume)) sfxVolume = 0.8; // Default jika NaN
-            soundtrackVolume = parseFloat(localStorage.getItem('soundtrackVolume'));
-            if (isNaN(soundtrackVolume)) soundtrackVolume = 0.3; // Default jika NaN
-
-
+            if (isNaN(sfxVolume)) sfxVolume = 0.8;
+            
             sfxToggle.textContent = sfxOn ? "ON" : "OFF";
             sfxToggle.classList.toggle('on', sfxOn);
             sfxToggle.classList.toggle('off', !sfxOn);
             sfxVolumeSlider.value = sfxVolume;
-
-            soundtrackToggle.textContent = soundtrackOn ? "ON" : "OFF";
-            soundtrackToggle.classList.toggle('on', soundtrackOn);
-            soundtrackToggle.classList.toggle('off', !soundtrackOn);
-            soundtrackVolumeSlider.value = soundtrackVolume;
             
             applyVolumeSettings();
-            if (soundtrackOn && soundsReady && Tone.Transport.state !== "started") {
-                Tone.Transport.start();
-            } else if (!soundtrackOn && soundsReady && Tone.Transport.state === "started") {
-                Tone.Transport.pause(); 
-            }
         }
 
         function saveSettings() {
             localStorage.setItem('sfxOn', sfxOn);
-            localStorage.setItem('soundtrackOn', soundtrackOn);
             localStorage.setItem('sfxVolume', sfxVolume);
-            localStorage.setItem('soundtrackVolume', soundtrackVolume);
         }
         
         function applyVolumeSettings() {
             if (!soundsReady) return;
             
             const sfxMasterVolumeDb = sfxOn ? Tone.gainToDb(sfxVolume) : -Infinity;
-            [hitSynth, gameOverSynth, clickSynth, difficultyUpSynth, deleteScoreSynth, 
+             [hitSynth, gameOverSynth, difficultyUpSynth, deleteScoreSynth, 
              absorbActivateSynth, slowActivateSynth, healActivateSynth, miniActivateSynth, polyActivateSynth]
             .forEach(synth => {
-                if (synth) synth.volume.value = sfxMasterVolumeDb; // Atur volume individu jika perlu, atau biarkan master
+                // Periksa apakah synth dan properti volume ada sebelum Mengaturnya
+                if (synth && typeof synth.volume !== 'undefined' && typeof synth.volume.value !== 'undefined') {
+                     // Jika synth memiliki volume yang ditetapkan secara internal (misalnya, absorbActivateSynth.volume = -6),
+                     // kita mungkin ingin sfxMasterVolumeDb ditambahkan ke itu, bukan menimpanya.
+                     // Namun, untuk kesederhanaan, kita akan menimpanya, yang berarti volume internal hanyalah default awal.
+                    synth.volume.value = sfxMasterVolumeDb;
+                }
             });
-            // Khususnya, clickSynth mungkin ingin volume yang lebih rendah secara default
-            if(clickSynth) clickSynth.volume.value = sfxOn ? Tone.gainToDb(sfxVolume * 0.5) : -Infinity; // Click lebih pelan
-
-
-            if (soundtrackMelodySynth && soundtrackPadSynth && soundtrackBassSynth) {
-                const baseSoundtrackVol = soundtrackOn ? soundtrackVolume : 0;
-                soundtrackMelodySynth.volume.value = Tone.gainToDb(baseSoundtrackVol * 0.5); // Melodi lebih menonjol
-                soundtrackPadSynth.volume.value = Tone.gainToDb(baseSoundtrackVol * 0.25); // Pad lebih lembut
-                soundtrackBassSynth.volume.value = Tone.gainToDb(baseSoundtrackVol * 0.35); // Bass
+            if(clickSynth && typeof clickSynth.volume !== 'undefined' && typeof clickSynth.volume.value !== 'undefined') {
+                clickSynth.volume.value = sfxOn ? Tone.gainToDb(sfxVolume * 0.3) : -Infinity; 
             }
         }
 
@@ -634,8 +636,7 @@
             if (!soundsReady) { 
                 initSounds().then(loadSettings).catch(err => console.error("Gagal inisialisasi suara otomatis:", err));
             } else {
-                applyVolumeSettings(); // Terapkan volume saat game mulai
-                if (soundtrackOn && Tone.Transport.state !== "started") Tone.Transport.start();
+                applyVolumeSettings(); 
             }
             isGameOver = false; activePowerUpEffects = {}; powerUpsOnScreen = [];
             mainMenuScreen.classList.remove('active'); settingsScreen.classList.remove('active');
@@ -821,7 +822,6 @@
         function gameOver() {
             isGameOver = true; cancelAnimationFrame(animationFrameId); playerVelocityX = 0; 
             if (sfxOn && soundsReady) gameOverSynth.triggerAttackRelease("G2", "1.2n", Tone.now());
-            if (soundtrackOn && soundsReady && Tone.Transport.state === "started") Tone.Transport.pause();
 
             Object.values(POWER_UP_TYPES).forEach(pt => { 
                 if (activePowerUpEffects[pt.id] && pt.onExpire) pt.onExpire();
@@ -856,7 +856,7 @@
                     maxSpawnIntervalMs = Math.max(100, maxSpawnIntervalMs / 1.1); 
                     if (minSpawnIntervalMs >= maxSpawnIntervalMs) maxSpawnIntervalMs = minSpawnIntervalMs + 70; 
                     minObstacleSpeed *= 1.075; maxObstacleSpeed *= 1.075; 
-                    if (sfxOn && soundsReady) difficultyUpSynth.triggerAttackRelease("C6", "32n", Tone.now());
+                    if (sfxOn && soundsReady) difficultyUpSynth.triggerAttackRelease("D6", "32n", Tone.now(), 0.6); 
                 }
                 lastMultiplierUpdateTime = currentTime;
             }
@@ -881,37 +881,17 @@
         function stopMovement() { playerVelocityX = 0; }
 
         settingsButton.addEventListener('click', () => {
-            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now(), 0.7);
             mainMenuScreen.classList.remove('active');
             settingsScreen.classList.add('active');
         });
 
         backToMenuButton.addEventListener('click', () => {
-            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now(), 0.7);
             settingsScreen.classList.remove('active');
             mainMenuScreen.classList.add('active');
             saveSettings(); 
         });
-
-        soundtrackToggle.addEventListener('click', () => {
-            soundtrackOn = !soundtrackOn;
-            soundtrackToggle.textContent = soundtrackOn ? "ON" : "OFF";
-            soundtrackToggle.classList.toggle('on', soundtrackOn);
-            soundtrackToggle.classList.toggle('off', !soundtrackOn);
-            if (soundtrackOn && soundsReady && Tone.Transport.state !== "started") {
-                Tone.Transport.start();
-            } else if (!soundtrackOn && soundsReady && Tone.Transport.state === "started") {
-                Tone.Transport.pause();
-            }
-            applyVolumeSettings();
-            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("E4", "16n", Tone.now());
-        });
-
-        soundtrackVolumeSlider.addEventListener('input', (e) => {
-            soundtrackVolume = parseFloat(e.target.value);
-            applyVolumeSettings();
-        });
-        soundtrackVolumeSlider.addEventListener('change', saveSettings); // Simpan saat selesai geser
 
         sfxToggle.addEventListener('click', () => {
             sfxOn = !sfxOn;
@@ -919,51 +899,49 @@
             sfxToggle.classList.toggle('on', sfxOn);
             sfxToggle.classList.toggle('off', !sfxOn);
             applyVolumeSettings();
-            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("D4", "16n", Tone.now());
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("D4", "16n", Tone.now(), 0.6);
         });
 
         sfxVolumeSlider.addEventListener('input', (e) => {
             sfxVolume = parseFloat(e.target.value);
             applyVolumeSettings();
         });
-        sfxVolumeSlider.addEventListener('change', saveSettings); // Simpan saat selesai geser
+        sfxVolumeSlider.addEventListener('change', saveSettings); 
         
         deleteHighScoreButton.addEventListener('click', () => {
-            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("A3", "8n", Tone.now());
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("A3", "8n", Tone.now(), 0.7);
             confirmDeleteModal.style.display = 'flex';
         });
 
         confirmDeleteYes.addEventListener('click', () => {
-            if (sfxOn && soundsReady) deleteScoreSynth.triggerAttackRelease(0.15, Tone.now());
+            if (sfxOn && soundsReady) deleteScoreSynth.triggerAttackRelease(0.1, Tone.now());
             localStorage.removeItem('obstacleGameHighScoreTime');
             highScoreTime = 0;
-            // Update tampilan rekor di semua tempat yang relevan
-            updateUIDisplay(); // Jika game sedang berjalan (tidak mungkin dari sini)
+            updateUIDisplay(); 
             highScoreDisplay.textContent = `Rekor: ${formatTime(highScoreTime)}`; 
-            if (gameOverScreen.classList.contains('active')) { // Jika layar game over aktif
+            if (gameOverScreen.classList.contains('active')) {
                  gameOverHighScoreDisplay.textContent = `Rekor Waktu: ${formatTime(highScoreTime)}`;
             }
             confirmDeleteModal.style.display = 'none';
         });
 
         confirmDeleteNo.addEventListener('click', () => {
-            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C3", "16n", Tone.now());
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C3", "16n", Tone.now(), 0.5);
             confirmDeleteModal.style.display = 'none';
         });
 
-
         startGameButton.addEventListener('click', () => {
-            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now(), 0.8);
             else if (!soundsReady) { 
                 initSounds().then(() => {
                     loadSettings(); 
-                    if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+                    if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now(), 0.8);
                 }).catch(err => console.error("Gagal inisialisasi suara saat klik:", err));
             }
             initGame();
         }); 
         restartButton.addEventListener('click', () => {
-            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
+            if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C4", "8n", Tone.now(), 0.8);
             initGame();
         }); 
         leftControl.addEventListener('mousedown', moveLeft);
