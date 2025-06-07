@@ -10,7 +10,7 @@
     <style>
         :root {
             /* Variables for easier theme management */
-            --ui-background-color: rgba(230, 230, 230, 0.5); /* Light gray with 50% transparency */
+            --ui-background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
             --ui-text-color: #1A202C; /* Very dark gray for high contrast */
             --ui-border-radius-large: 10px; 
             --ui-border-radius-small: 8px; 
@@ -22,6 +22,7 @@
             --armor-color: #4299E1; /* Blue */
             --resilience-color: #CD7F32; /* Bronze */
             --ultimate-charge-color: #9F7AEA; /* Purple */
+            --ultimate-charge-inactive-color: #A0AEC0; /* Gray for inactive icons */
         }
 
         body {
@@ -89,7 +90,8 @@
             gap: 6px; 
             background-color: var(--ui-background-color);
             color: var(--ui-text-color);
-            transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease, height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+            /* Refined transition for all UI elements */
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
         #hpContainer, #score {
@@ -97,7 +99,7 @@
             font-size: clamp(15px, 2.5vw, 17px);
         }
 
-        #armorContainer, #resilienceContainer, #highScore, #ultimateChargeContainer {
+        #armorContainer, #resilienceContainer, #highScore, #ultimateContainer {
             padding: 4px 8px;
             font-size: clamp(11px, 1.9vw, 13px);
             border-radius: var(--ui-border-radius-small);
@@ -106,13 +108,18 @@
         #hpContainer {
             min-width: 130px; 
         }
-        #hpContainer.status-safe { background-color: rgba(72, 187, 120, 0.6); color: white; }
-        #hpContainer.status-warning { background-color: rgba(246, 224, 94, 0.6); color: var(--ui-text-color); }
-        #hpContainer.status-critical { background-color: rgba(245, 101, 101, 0.6); color: white; }
-        #hpContainer.status-critical .ui-value { animation: blinkCritical 1.2s infinite; }
+        /* HP status colors with updated transparency */
+        #hpContainer.status-safe { background-color: rgba(72, 187, 120, 0.5); color: white; }
+        #hpContainer.status-warning { background-color: rgba(246, 224, 94, 0.75); color: var(--ui-text-color); }
+        #hpContainer.status-critical { background-color: rgba(245, 101, 101, 1); color: white; }
+        
+        /* Updated critical HP blink animation */
+        #hpContainer.status-critical .ui-value {
+            animation: blinkCritical 2s infinite ease-in-out;
+        }
 
         @keyframes blinkCritical {
-            50% { opacity: 0.7; }
+            50% { opacity: 0.6; }
         }
 
         #armorContainer {
@@ -124,21 +131,73 @@
             color: white;
         }
 
+        /* Enhanced animation for disappearing elements */
         #armorContainer[data-visible="false"], #resilienceContainer[data-visible="false"] {
             opacity: 0;
-            transform: scale(0.9);
+            transform: translateX(-20px) scale(0.9);
             pointer-events: none;
             height: 0 !important;
             padding-top: 0 !important;
             padding-bottom: 0 !important;
-            margin-top: -6px;
+            margin-bottom: -6px; /* Negative margin to collapse space */
             overflow: hidden;
         }
         
-        #ultimateChargeContainer {
-             color: var(--ultimate-charge-color);
-             font-weight: 700;
+        /* Ultimate UI Area Fixed */
+        #ultimateContainer {
+            position: relative;
+            min-width: 65px; 
+            min-height: 28px;
+            justify-content: center;
         }
+        #ultimateChargeIconContainer, #ultimateActiveLabel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+
+        #ultimateChargeIconContainer {
+            gap: 6px;
+        }
+        
+        #ultimateChargeIconContainer.hidden {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+            pointer-events: none;
+        }
+
+        #ultimateActiveLabel {
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+
+        #ultimateActiveLabel.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        #ultimateChargeIconContainer .ui-icon svg {
+            width: clamp(14px, 2.2vw, 16px);
+            height: clamp(14px, 2.2vw, 16px);
+            transition: all 0.3s ease;
+        }
+        .ultimate-charge-icon {
+            color: var(--ultimate-charge-inactive-color);
+        }
+        .ultimate-charge-icon.active {
+            color: var(--ultimate-charge-color);
+            transform: scale(1.1);
+        }
+
         .barOuter { 
             flex-grow: 1; 
             height: 8px; 
@@ -160,52 +219,62 @@
             align-items: center;
             justify-content: center;
         }
-        #hpContainer .ui-icon, #score .ui-icon { font-size: clamp(18px, 3vw, 20px); }
-        #armorContainer .ui-icon, #resilienceContainer .ui-icon, #highScore .ui-icon, #ultimateChargeContainer .ui-icon { font-size: clamp(14px, 2.2vw, 16px); }
+        #hpContainer .ui-icon { font-size: clamp(18px, 3vw, 20px); }
+        #armorContainer .ui-icon, #resilienceContainer .ui-icon, #highScore .ui-icon, #score .ui-icon { font-size: clamp(14px, 2.2vw, 16px); }
 
         .ui-icon svg { width: 1em; height: 1em; fill: currentColor; }
-        #ultimateChargeContainer .ui-icon svg { fill: var(--ultimate-charge-color); }
         .ui-value { font-weight: 700; }
 
+        /* New Power-up Text-based UI */
         #activePowerUpUI {
             display: flex;
             flex-direction: column; 
             align-items: flex-start;
-            gap: 5px; 
-            width: 100%;
-        }
-        .active-powerup-info {
-            display: flex;
-            align-items: center;
             gap: 6px; 
+        }
+        
+        .power-up-label {
+            position: relative;
+            padding: 4px 10px;
             font-size: clamp(11px, 1.9vw, 13px);
-            color: white;
-            background-color: rgba(26, 32, 44, 0.6); /* Dark slate with transparency */
-            padding: 4px 8px; 
+            font-weight: 600;
             border-radius: var(--ui-border-radius-small);
             box-shadow: var(--ui-shadow);
-            width: auto; 
-            max-width: 180px; 
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            color: var(--ui-text-color);
+            background-color: var(--ui-background-color);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
+            overflow: hidden; /* Hide overflow from ring */
+            z-index: 1; /* Make sure text is on top */
         }
-        .powerup-timer-bar-container {
-            width: 50px;
-            height: 4px; 
-            background-color: rgba(255,255,255,0.25);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .powerup-timer-bar {
-            height: 100%;
-            border-radius: 2px; 
-            transition: width 0.1s linear;
-        }
-        .ultimate-active-label { 
-            background: linear-gradient(135deg, rgba(0, 123, 255, 0.6), rgba(138, 43, 226, 0.6)); 
-            font-weight: 700; 
+        .power-up-label.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
         }
 
+        .power-up-label .timer-ring {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1; /* Place ring behind text */
+        }
+        .power-up-label .timer-ring-fg {
+            fill: none;
+            stroke-width: 4; /* Thicker ring */
+            stroke-linecap: butt;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        .ultimate-active-label {
+            background: linear-gradient(135deg, rgba(126, 43, 226, 0.5), rgba(0, 123, 255, 0.5));
+            color: white;
+        }
+        
         /* --- Screens & Modals --- */
         .screen-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; border-radius: 28px; padding: 25px; box-sizing: border-box; opacity: 0; visibility: hidden; transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); backdrop-filter: blur(5px); }
         .screen-overlay.active { opacity: 1; visibility: visible; }
@@ -249,9 +318,15 @@
                 <symbol id="icon-heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></symbol>
                 <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></symbol>
                 <symbol id="icon-bolt" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></symbol>
-                <symbol id="icon-clock" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-5H7v-2h6v2h-2v4h-2v-4z" transform="scale(1.1) translate(-1.2, -1.2)"/></symbol>
-                <symbol id="icon-trophy" viewBox="0 0 24 24"><path d="M19 4h-1.5a2.5 2.5 0 00-5 0H10a2.5 2.5 0 00-5 0H3.5a1.5 1.5 0 00-1.5 1.5V9c0 .8.54 1.5 1.25 1.5H4v5h16v-5h.25c.71 0 1.25-.7 1.25-1.5V5.5A1.5 1.5 0 0019 4zm-7 2a1 1 0 110-2 1 1 0 010 2zM6.5 6a1 1 0 110-2 1 1 0 010 2zm11 0a1 1 0 110-2 1 1 0 010 2zM4 17h16v2H4v-2z"/></symbol>
+                <symbol id="icon-time" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.47 10 10 10 10-4.47 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></symbol>
+                <symbol id="icon-medal" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C9.24 2 7 4.24 7 7s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm6 4H6c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-2c0-1.1-.9-2-2-2z"/></symbol>
                 <symbol id="icon-resilience" viewBox="0 0 24 24"><path d="M12 2L4 5v5.11c0 5.23 3.55 9.93 8 11.89c4.45-1.96 8-6.66 8-11.89V5l-8-3zm-1 2.36l6 2.15v3.42c0 .9-.13 1.76-.38 2.58l-5.62-5.62V4.36zm2 15.28c-3.14-1.42-5-4.99-5-8.64V7.93l9 3.21v2.9c0 3.65-1.86 7.22-5 8.64h1z"/></symbol>
+                
+                <!-- Gradient for Ultimate Timer Ring -->
+                <linearGradient id="ultimate-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#9F7AEA" />
+                    <stop offset="100%" stop-color="#4299E1" />
+                </linearGradient>
             </defs>
         </svg>
 
@@ -281,16 +356,21 @@
             </div>
             <div class="ui-column right">
                 <div id="score" class="ui-element">
-                    <span class="ui-icon"><svg><use xlink:href="#icon-clock"></use></svg></span>
+                    <span class="ui-icon"><svg><use xlink:href="#icon-time"></use></svg></span>
                     <span id="scoreValue">0,0s</span>
                 </div>
                 <div id="highScore" class="ui-element">
-                    <span class="ui-icon"><svg><use xlink:href="#icon-trophy"></use></svg></span>
+                    <span class="ui-icon"><svg><use xlink:href="#icon-medal"></use></svg></span>
                     <span id="highScoreValue">0,0s</span>
                 </div>
-                <div id="ultimateChargeContainer" class="ui-element">
-                     <span class="ui-icon"><svg><use xlink:href="#icon-bolt"></use></svg></span>
-                     <span id="ultimateChargeValue" class="ui-value">0</span>/<span id="ultimateChargeNeededValue" class="ui-value">5</span>
+                <!-- Ultimate UI Container Fixed -->
+                <div id="ultimateContainer" class="ui-element">
+                    <div id="ultimateChargeIconContainer">
+                       <span class="ui-icon ultimate-charge-icon"><svg><use xlink:href="#icon-bolt"></use></svg></span>
+                       <span class="ui-icon ultimate-charge-icon"><svg><use xlink:href="#icon-bolt"></use></svg></span>
+                       <span class="ui-icon ultimate-charge-icon"><svg><use xlink:href="#icon-bolt"></use></svg></span>
+                    </div>
+                    <div id="ultimateActiveLabel"></div>
                 </div>
             </div>
         </div>
@@ -337,12 +417,17 @@
         const sfxVolumeSlider = document.getElementById('sfxVolume'); const sfxToggle = document.getElementById('sfxToggle');
         const deleteHighScoreButton = document.getElementById('deleteHighScoreButton'); const backToMenuButton = document.getElementById('backToMenuButton');
         const confirmDeleteModal = document.getElementById('confirmDeleteModal'); const confirmDeleteYes = document.getElementById('confirmDeleteYes'); const confirmDeleteNo = document.getElementById('confirmDeleteNo');
-        const scoreValueDisplay = document.getElementById('scoreValue'); const highScoreValueDisplay = document.getElementById('highScoreValue');
+        const scoreDisplay = document.getElementById('score');
+        const scoreValueDisplay = document.getElementById('scoreValue'); 
+        const highScoreDisplay = document.getElementById('highScore');
+        const highScoreValueDisplay = document.getElementById('highScoreValue');
         const hpContainer = document.getElementById('hpContainer');
         const hpValueDisplay = document.getElementById('hpValue'); const hpBarInner = document.getElementById('hpBarInner');
         const armorContainer = document.getElementById('armorContainer'); const armorValueDisplay = document.getElementById('armorValue'); const armorBarInner = document.getElementById('armorBarInner');
         const resilienceContainer = document.getElementById('resilienceContainer'); const resilienceValueDisplay = document.getElementById('resilienceValue');
-        const ultimateChargeValueDisplay = document.getElementById('ultimateChargeValue'); const ultimateChargeNeededDisplay = document.getElementById('ultimateChargeNeededValue'); 
+        const ultimateContainer = document.getElementById('ultimateContainer');
+        const ultimateChargeIconContainer = document.getElementById('ultimateChargeIconContainer');
+        const ultimateActiveLabel = document.getElementById('ultimateActiveLabel');
         const activePowerUpUIDiv = document.getElementById('activePowerUpUI');
         const gameOverScreen = document.getElementById('gameOverScreen'); const finalScoreDisplay = document.getElementById('finalScore'); const gameOverHighScoreDisplay = document.getElementById('gameOverHighScore');
         const restartButton = document.getElementById('restartButton');
@@ -353,7 +438,7 @@
         let powerUpsOnScreen = [], activePowerUpEffects = {}, pendingPowerUpEffects = {};
         let animationFrameId, isGameOver = false, playerVelocityX = 0;
         let difficultyTimer, armorDecayTimer;
-        let minSpawnIntervalMs, maxSpawnIntervalMs, minObstacleSpeed, maxObstacleSpeed;
+        let minSpawnIntervalMs, maxSpawnIntervalMs, minObstacleSpeed, maxObstacleSpeed, minPowerUpSpeed, maxPowerUpSpeed;
         let playerHitEffectTimer = 0;
         
         let nextObstacleSpawnTimer = 0;
@@ -364,9 +449,8 @@
         let obstacleBaseRadius, powerUpObjectRadius;
         
         let ultimateChargeCount = 0;
-        const ULTIMATE_CHARGE_NEEDED = 5;
+        const ULTIMATE_CHARGE_NEEDED = 3;
         let isUltimateActive = false;
-        let baseResilienceStart = 3;
         
         // --- CONSTANTS AND DEFINITIONS ---
         const OBSTACLE_SHAPES = [ 
@@ -379,14 +463,14 @@
         ];
         
         const POWER_UP_TYPES = {
-            RESILIENCE:  { id: 'RESILIENCE',  name: 'Resilience',  color: '#CD7F32', draw: drawResilienceShape,  duration: 60, minSpawn: 10,  maxSpawn: 120, onCollect: activateResilience,  onExpire: deactivateResilience,  sfxCollect: () => { if(sfxOn && soundsReady) resilienceActivateSynth.triggerAttackRelease("A2", "0.2s", Tone.now()); }},
+            RESILIENCE:  { id: 'RESILIENCE',  name: 'Resilience',  color: '#CD7F32', draw: drawResilienceShape,  duration: 90, minSpawn: 10,  maxSpawn: 180, onCollect: activateResilience,  onExpire: deactivateResilience,  sfxCollect: () => { if(sfxOn && soundsReady) resilienceActivateSynth.triggerAttackRelease("A2", "0.2s", Tone.now()); }},
             SLOW:        { id: 'SLOW',        name: 'Slow',        color: '#5499C7', draw: drawSlowShape,        duration: 30, minSpawn: 30,  maxSpawn: 120, onCollect: activateSlow,        onExpire: deactivateSlow,        sfxCollect: () => { if(sfxOn && soundsReady) { slowActivateSynth.triggerAttack("G2", Tone.now()); slowActivateSynth.frequency.rampTo("F#2", 0.5, Tone.now() + 0.1); slowActivateSynth.triggerRelease(Tone.now() + 0.6); }}},
             ABSORB:      { id: 'ABSORB',      name: 'Absorb',      color: '#48C9B0', draw: drawAbsorbShape,      duration: 30, minSpawn: 30,  maxSpawn: 150, onCollect: activateAbsorb,      onExpire: deactivateAbsorb,      sfxCollect: () => { if(sfxOn && soundsReady) absorbActivateSynth.triggerAttackRelease("G3", "0.35s", Tone.now(), 1.0); } },
-            MINIATURIZE: { id: 'MINIATURIZE', name: 'Mini',        color: '#A569BD', draw: drawMiniaturizeShape, duration: 30, minSpawn: 30,  maxSpawn: 210, onCollect: activateMiniaturize, onExpire: deactivateMiniaturize, sfxCollect: () => { if(sfxOn && soundsReady) { miniActivateSynth.triggerAttackRelease("A6", "0.05s", Tone.now(), 0.7); miniActivateSynth.triggerAttackRelease("D7", "0.05s", Tone.now() + 0.04, 0.6); }}},
-            POLYMORPH:   { id: 'POLYMORPH',   name: 'Poly',        color: '#5D6D7E', draw: drawPolymorphShape,   duration: 30, minSpawn: 30,  maxSpawn: 300, onCollect: activatePolymorph,   onExpire: deactivatePolymorph,   sfxCollect: () => { if(sfxOn && soundsReady) polyActivateSynth.triggerAttackRelease(["C4", "Eb4", "G4", "Bb4"], "0.3s", Tone.now()); }},
+            MINIATURIZE: { id: 'MINIATURIZE', name: 'Miniaturize', color: '#A569BD', draw: drawMiniaturizeShape, duration: 30, minSpawn: 30,  maxSpawn: 210, onCollect: activateMiniaturize, onExpire: deactivateMiniaturize, sfxCollect: () => { if(sfxOn && soundsReady) { miniActivateSynth.triggerAttackRelease("A6", "0.05s", Tone.now(), 0.7); miniActivateSynth.triggerAttackRelease("D7", "0.05s", Tone.now() + 0.04, 0.6); }}},
+            POLYMORPH:   { id: 'POLYMORPH',   name: 'Polymorph',   color: '#5D6D7E', draw: drawPolymorphShape,   duration: 30, minSpawn: 30,  maxSpawn: 300, onCollect: activatePolymorph,   onExpire: deactivatePolymorph,   sfxCollect: () => { if(sfxOn && soundsReady) polyActivateSynth.triggerAttackRelease(["C4", "Eb4", "G4", "Bb4"], "0.3s", Tone.now()); }},
             SHIELD:      { id: 'SHIELD',      name: 'Shield',      color: '#4FC3F7', draw: drawShieldShapeModern,duration: 0,  minSpawn: 60,  maxSpawn: 300, onCollect: activateShield,      sfxCollect: () => { if(sfxOn && soundsReady) shieldActivateSynth.triggerAttackRelease(0.2, Tone.now()); }},
             HEAL:        { id: 'HEAL',        name: 'Heal',        color: '#2ECC71', draw: drawHealShape,        duration: 0,  minSpawn: 1,   maxSpawn: 30,  onCollect: activateHeal,        sfxCollect: () => { if(sfxOn && soundsReady) { healActivateSynth.triggerAttackRelease("C5", "0.4s", Tone.now(), 0.8); healActivateSynth.triggerAttackRelease("G5", "0.4s", Tone.now() + 0.15, 0.7); }}},
-            CHARGE_ULTIMATE: { id: 'CHARGE_ULTIMATE', name: 'Ult Charge',  color: '#BF55EC', draw: drawChargeUltimateShapeModern, duration: 0, minSpawn: 1,   maxSpawn: 90, onCollect: collectUltimateCharge, sfxCollect: () => { if(sfxOn && soundsReady) chargeUltimateSynth.triggerAttackRelease("C5", "0.1s", Tone.now(), 0.6); }},
+            CHARGE_ULTIMATE: { id: 'CHARGE_ULTIMATE', name: 'Ult Charge',  color: '#BF55EC', draw: drawChargeUltimateShapeModern, duration: 0, minSpawn: 15,   maxSpawn: 150, onCollect: collectUltimateCharge, sfxCollect: () => { if(sfxOn && soundsReady) chargeUltimateSynth.triggerAttackRelease("C5", "0.1s", Tone.now(), 0.6); }},
             ULTIMATE:    { id: 'ULTIMATE',    name: 'Ultimate',    color: '#007bff', draw: () => {},               duration: 30, onActivate: activateUltimateEffects, onExpire: deactivateUltimateEffects, sfxActivate: () => { if(sfxOn && soundsReady) ultimateActivateSynth.triggerAttackRelease(["C3", "G3", "C4"], "1.5s", Tone.now()); }}
         };
         
@@ -401,7 +485,7 @@
         
         // --- GAME LOGIC FUNCTIONS ---
         function activatePowerUp(typeId, effectDetails) { 
-            if (isUltimateActive) { 
+            if (isUltimateActive && typeId !== 'ULTIMATE') { 
                 pendingPowerUpEffects[typeId] = { ...effectDetails }; 
             } else {
                 activePowerUpEffects[typeId] = { ...effectDetails };
@@ -419,21 +503,27 @@
         function activatePolymorph() { activatePowerUp('POLYMORPH', { timeLeft: POWER_UP_TYPES.POLYMORPH.duration, totalDuration: POWER_UP_TYPES.POLYMORPH.duration }); }
         function deactivatePolymorph() { delete activePowerUpEffects.POLYMORPH; }
 
-        function activateResilience() { 
-            baseResilienceStart += 3;
-            // If resilience is already active, keep the current percentage and just reset the timer
+        function activateResilience() {
             if (activePowerUpEffects.RESILIENCE) {
-                activePowerUpEffects.RESILIENCE.timeLeft = POWER_UP_TYPES.RESILIENCE.duration;
-                activePowerUpEffects.RESILIENCE.totalDuration = POWER_UP_TYPES.RESILIENCE.duration;
+                // If already active, add 10%
+                resiliencePercentage = Math.min(80, resiliencePercentage + 10);
             } else {
-                 activatePowerUp('RESILIENCE', { timeLeft: POWER_UP_TYPES.RESILIENCE.duration, totalDuration: POWER_UP_TYPES.RESILIENCE.duration });
+                 // On first activation, set to 10%
+                 resiliencePercentage = 10;
             }
-            // Ensure the current percentage is at least the base
-            if(resiliencePercentage < baseResilienceStart) {
-                resiliencePercentage = baseResilienceStart;
-            }
+
+            // Activate/refresh the timer
+            activatePowerUp('RESILIENCE', {
+                timeLeft: POWER_UP_TYPES.RESILIENCE.duration,
+                totalDuration: POWER_UP_TYPES.RESILIENCE.duration
+            });
         }
-        function deactivateResilience() { delete activePowerUpEffects.RESILIENCE; if (!isUltimateActive) { resiliencePercentage = 0; } }
+        function deactivateResilience() { 
+            delete activePowerUpEffects.RESILIENCE; 
+            if (!isUltimateActive) { 
+                resiliencePercentage = 0; 
+            } 
+        }
 
         function collectUltimateCharge() {
             ultimateChargeCount = Math.min(ULTIMATE_CHARGE_NEEDED, ultimateChargeCount + 1);
@@ -454,16 +544,28 @@
         }
         
         function activateUltimateEffects() {
-            activePowerUpEffects.ULTIMATE = { timeLeft: POWER_UP_TYPES.ULTIMATE.duration, totalDuration: POWER_UP_TYPES.ULTIMATE.duration, name: "Ultimate" };
+            activatePowerUp('ULTIMATE', { timeLeft: POWER_UP_TYPES.ULTIMATE.duration, totalDuration: POWER_UP_TYPES.ULTIMATE.duration, name: "Ultimate" });
             playerHP = 1000; playerArmor = 1000;
-            baseResilienceStart += 3;
-            if (resiliencePercentage < baseResilienceStart) { resiliencePercentage = baseResilienceStart; }
+           
+            // If resilience is active, add 10%
+            if (resiliencePercentage > 0) {
+                resiliencePercentage = Math.min(80, resiliencePercentage + 10);
+            }
+
             updateUIDisplay();
         }
 
         function deactivateUltimateEffects() {
-            isUltimateActive = false; delete activePowerUpEffects.ULTIMATE;
-            if (!pendingPowerUpEffects.RESILIENCE) { resiliencePercentage = 0; }
+            isUltimateActive = false; 
+            delete activePowerUpEffects.ULTIMATE;
+            scoreDisplay.classList.remove('ultimate-effect-active');
+            highScoreDisplay.classList.remove('ultimate-effect-active');
+
+            // If resilience wasn't pending, it gets reset.
+            if (!pendingPowerUpEffects.RESILIENCE) { 
+                resiliencePercentage = 0; 
+            }
+            // Restore any pending effects
             for (const id in pendingPowerUpEffects) { activePowerUpEffects[id] = { ...pendingPowerUpEffects[id] }; }
             pendingPowerUpEffects = {}; updateUIDisplay();
         }
@@ -491,7 +593,6 @@
             const storedHighScore = parseInt(localStorage.getItem('obstacleGameHighScoreTime')) || 0; 
             highScoreValueDisplay.textContent = formatTime(storedHighScore); 
             loadSettings(); 
-            baseResilienceStart = 3;
         }
 
         function showGameElements() { gameCanvas.style.display = 'block'; document.querySelector('.ui-text-container').style.display = 'flex'; leftControl.style.display = 'block'; rightControl.style.display = 'block'; }
@@ -523,12 +624,7 @@
 
             playerHP = 1000; 
             playerArmor = 1000; 
-            
-            resiliencePercentage = baseResilienceStart;
-            activePowerUpEffects.RESILIENCE = { 
-                timeLeft: POWER_UP_TYPES.RESILIENCE.duration, 
-                totalDuration: POWER_UP_TYPES.RESILIENCE.duration 
-            };
+            resiliencePercentage = 0; // Starts at 0, activated by power-up
 
             playerHitEffectTimer = 0;
             obstacles = []; currentScoreTime = 0; 
@@ -537,8 +633,14 @@
             difficultyTimer = 0;
             armorDecayTimer = 0;
 
-            minSpawnIntervalMs = 120; maxSpawnIntervalMs = 800; 
-            minObstacleSpeed = 1.3 * 60; maxObstacleSpeed = 3.2 * 60; 
+            // Updated difficulty parameters
+            minSpawnIntervalMs = 25; 
+            maxSpawnIntervalMs = 1000; 
+            minObstacleSpeed = 100; 
+            maxObstacleSpeed = 1000; 
+            minPowerUpSpeed = 100;
+            maxPowerUpSpeed = 500;
+            
             setNextObstacleSpawnTime();
             
             Object.values(POWER_UP_TYPES).forEach(pt => { 
@@ -577,24 +679,107 @@
         }
 
         function updateObstacles(deltaTime) { obstacles.forEach((obstacle, index) => { obstacle.y += obstacle.speed * deltaTime; let currentRadius = obstacleBaseRadius * ((isUltimateActive || activePowerUpEffects.MINIATURIZE) ? (1/1.5) : 1); if (obstacle.y - currentRadius > canvas.height) obstacles.splice(index, 1); });}
-        function spawnPowerUp(typeId) { const x = Math.random() * (canvas.width - powerUpObjectRadius * 2) + powerUpObjectRadius; const y = -powerUpObjectRadius; powerUpsOnScreen.push({ x, y, radius: powerUpObjectRadius, typeId, speed: 1.8 * 60 }); }
-        function updatePowerUpsOnScreen(deltaTime) { powerUpsOnScreen.forEach((pu, index) => { pu.y += pu.speed * deltaTime; if (pu.y - pu.radius > canvas.height) powerUpsOnScreen.splice(index, 1); });}
         
-        function managePowerUpSpawning(deltaTime) { 
-            Object.values(POWER_UP_TYPES).forEach(pt => { 
+        function spawnPowerUp(typeId) { 
+            const x = Math.random() * (canvas.width - powerUpObjectRadius * 2) + powerUpObjectRadius; 
+            const y = -powerUpObjectRadius; 
+            const speed = Math.random() * (maxPowerUpSpeed - minPowerUpSpeed) + minPowerUpSpeed;
+            powerUpsOnScreen.push({ x, y, radius: powerUpObjectRadius, typeId, speed }); 
+        }
+
+        function updatePowerUpsOnScreen(deltaTime) { 
+            powerUpsOnScreen.forEach((pu, index) => { 
+                pu.y += pu.speed * deltaTime; 
+                if (pu.y - pu.radius > canvas.height) {
+                    powerUpsOnScreen.splice(index, 1); 
+                }
+            });
+        }
+        
+        function managePowerUpSpawning(deltaTime) {
+            Object.values(POWER_UP_TYPES).forEach(pt => {
                 if (pt.id === 'ULTIMATE') return;
-                if(!pt.nextSpawnTimer) pt.nextSpawnTimer = (Math.random() * (pt.maxSpawn - pt.minSpawn) + pt.minSpawn);
+                
+                if (!pt.nextSpawnTimer) {
+                    pt.nextSpawnTimer = (Math.random() * (pt.maxSpawn - pt.minSpawn) + pt.minSpawn);
+                }
 
                 pt.nextSpawnTimer -= deltaTime;
-                if (pt.nextSpawnTimer <= 0) { 
-                    spawnPowerUp(pt.id); 
+                if (pt.nextSpawnTimer <= 0) {
+                    spawnPowerUp(pt.id);
                     pt.nextSpawnTimer = (Math.random() * (pt.maxSpawn - pt.minSpawn) + pt.minSpawn);
                 }
             });
         }
 
-        function updateActivePowerUpEffects(deltaTime) { const effectKeys = Object.keys(activePowerUpEffects); effectKeys.forEach(typeId => { if (activePowerUpEffects[typeId]) { if (activePowerUpEffects[typeId].timeLeft > 0) activePowerUpEffects[typeId].timeLeft -= deltaTime; else { const powerUpDef = POWER_UP_TYPES[typeId]; if (powerUpDef && powerUpDef.onExpire) powerUpDef.onExpire(); else delete activePowerUpEffects[typeId]; }}}); updateActivePowerUpUIDisplay(); }
-        function updateActivePowerUpUIDisplay() { activePowerUpUIDiv.innerHTML = ''; if (isUltimateActive && activePowerUpEffects.ULTIMATE) { const effect = activePowerUpEffects.ULTIMATE; const puInfo = POWER_UP_TYPES.ULTIMATE; const percentage = (effect.timeLeft / effect.totalDuration) * 100; const infoDiv = document.createElement('div'); infoDiv.className = 'active-powerup-info ultimate-active-label'; const nameSpan = document.createElement('span'); nameSpan.textContent = `${puInfo.name}: `; const barContainer = document.createElement('div'); barContainer.className = 'powerup-timer-bar-container'; const bar = document.createElement('div'); bar.className = 'powerup-timer-bar'; bar.style.width = `${percentage}%`; bar.style.background = 'linear-gradient(90deg, #8A2BE2, #007bff)'; barContainer.appendChild(bar); infoDiv.appendChild(nameSpan); infoDiv.appendChild(barContainer); activePowerUpUIDiv.appendChild(infoDiv); } else { Object.entries(activePowerUpEffects).forEach(([typeId, effect]) => { if (effect.totalDuration > 0 && typeId !== 'ULTIMATE') { const puInfo = POWER_UP_TYPES[typeId]; if (!puInfo) return; const percentage = (effect.timeLeft / effect.totalDuration) * 100; const infoDiv = document.createElement('div'); infoDiv.className = 'active-powerup-info'; infoDiv.style.borderColor = puInfo.color.startsWith('url') ? '#FFF' : puInfo.color; const nameSpan = document.createElement('span'); nameSpan.textContent = `${effect.name || puInfo.name}: `; const barContainer = document.createElement('div'); barContainer.className = 'powerup-timer-bar-container'; const bar = document.createElement('div'); bar.className = 'powerup-timer-bar'; bar.style.width = `${percentage}%`; bar.style.backgroundColor = puInfo.color.startsWith('url') ? '#CCC' : puInfo.color; barContainer.appendChild(bar); infoDiv.appendChild(nameSpan); infoDiv.appendChild(barContainer); activePowerUpUIDiv.appendChild(infoDiv); }});}}
+        function updateActivePowerUpEffects(deltaTime) {
+            const effectKeys = Object.keys(activePowerUpEffects);
+            effectKeys.forEach(typeId => {
+                if (activePowerUpEffects[typeId]) {
+                    if (activePowerUpEffects[typeId].timeLeft > 0) {
+                        activePowerUpEffects[typeId].timeLeft -= deltaTime;
+                    } else {
+                        const powerUpDef = POWER_UP_TYPES[typeId];
+                        if (powerUpDef && powerUpDef.onExpire) {
+                            powerUpDef.onExpire();
+                        } else {
+                            delete activePowerUpEffects[typeId];
+                        }
+                    }
+                }
+            });
+            updateActivePowerUpUIDisplay();
+        }
+
+        function updateActivePowerUpUIDisplay() {
+            const currentActiveIds = Object.keys(activePowerUpEffects).filter(id => id !== 'ULTIMATE' && activePowerUpEffects[id].totalDuration > 0);
+            
+            const uiElements = activePowerUpUIDiv.querySelectorAll('.power-up-label');
+            uiElements.forEach(el => {
+                const typeId = el.dataset.typeid;
+                if (!currentActiveIds.includes(typeId)) {
+                    el.classList.remove('visible');
+                    setTimeout(() => el.remove(), 400); 
+                }
+            });
+
+            currentActiveIds.forEach(typeId => {
+                let labelDiv = activePowerUpUIDiv.querySelector(`.power-up-label[data-typeid="${typeId}"]`);
+                const effect = activePowerUpEffects[typeId];
+                const puInfo = POWER_UP_TYPES[typeId];
+                if (!puInfo) return;
+
+                if (!labelDiv) {
+                    labelDiv = document.createElement('div');
+                    labelDiv.className = 'power-up-label';
+                    labelDiv.dataset.typeid = typeId;
+                    
+                    const ringHTML = `<svg class="timer-ring" viewBox="0 0 100 100" preserveAspectRatio="none"><path class="timer-ring-fg" d="" style="stroke: ${puInfo.color};"/></svg><span>${puInfo.name}</span>`;
+                    labelDiv.innerHTML = ringHTML;
+                    activePowerUpUIDiv.appendChild(labelDiv);
+                    
+                    requestAnimationFrame(() => {
+                        const w = labelDiv.offsetWidth;
+                        const h = labelDiv.offsetHeight;
+                        const r = parseFloat(getComputedStyle(labelDiv).borderRadius);
+                        const path = `M ${r},2 L ${w-r},2 A ${r-2},${r-2} 0 0 1 ${w-2},${r} L ${w-2},${h-r} A ${r-2},${r-2} 0 0 1 ${w-r},${h-2} L ${r},${h-2} A ${r-2},${r-2} 0 0 1 2,${h-r} L 2,${r} A ${r-2},${r-2} 0 0 1 ${r},2 Z`;
+                        const ringFg = labelDiv.querySelector('.timer-ring-fg');
+                        ringFg.setAttribute('d', path);
+                        ringFg.dataset.pathLength = ringFg.getTotalLength();
+                        labelDiv.classList.add('visible');
+                    });
+                }
+                
+                const percentage = (effect.timeLeft / effect.totalDuration);
+                const ringFg = labelDiv.querySelector('.timer-ring-fg');
+                const pathLength = parseFloat(ringFg.dataset.pathLength);
+
+                if(pathLength > 0){
+                    ringFg.style.strokeDasharray = `${pathLength} ${pathLength}`;
+                    ringFg.style.strokeDashoffset = pathLength * (1 - percentage);
+                }
+            });
+        }
         
         function updateArmor(deltaTime) { 
             armorDecayTimer += deltaTime;
@@ -611,19 +796,17 @@
         function handleCollision(rawDamageAmount) {
             let currentDamage = rawDamageAmount;
 
-            if (isUltimateActive || activePowerUpEffects.RESILIENCE) {
-                const resilienceToAdd = rawDamageAmount / 100;
-                resiliencePercentage = Math.min(90, resiliencePercentage + resilienceToAdd);
-            }
-
+            // Step 1: Apply damage reduction from current resilience.
             if (resiliencePercentage > 0) {
                 currentDamage *= (1 - (resiliencePercentage / 100));
             }
 
+            // Step 2: Apply other reductions (Absorb).
             if (isUltimateActive || activePowerUpEffects.ABSORB) {
                 currentDamage /= 2;
             }
 
+            // Step 3: Distribute final damage to armor and HP.
             let damageToArmor = 0;
             let damageToHp = 0;
             if (playerArmor > 0) {
@@ -641,6 +824,14 @@
             }
 
             playerHP -= damageToHp;
+            
+            // Step 4: After damage is dealt, convert raw damage to resilience if effect is active.
+            if (activePowerUpEffects.RESILIENCE) {
+                const resilienceToAdd = rawDamageAmount / 100;
+                resiliencePercentage = Math.min(80, resiliencePercentage + resilienceToAdd);
+            }
+
+            // Final updates
             playerHP = Math.max(0, playerHP);
             playerHitEffectTimer = PLAYER_HIT_DURATION;
             if (sfxOn && soundsReady) hitSynth.triggerAttackRelease(0.08, Tone.now());
@@ -667,18 +858,61 @@
             resilienceValueDisplay.textContent = `${resiliencePercentage.toFixed(1).replace('.', ',')}%`;
             resilienceContainer.dataset.visible = resiliencePercentage > 0;
             
-            ultimateChargeValueDisplay.textContent = ultimateChargeCount;
-            ultimateChargeNeededDisplay.textContent = ULTIMATE_CHARGE_NEEDED;
+            // Handle Ultimate UI visibility and animation
+            if (isUltimateActive) {
+                ultimateChargeIconContainer.classList.add('hidden');
+                let labelDiv = ultimateActiveLabel.querySelector('.power-up-label');
+                if (!labelDiv) {
+                    labelDiv = document.createElement('div');
+                    labelDiv.className = 'power-up-label ultimate-active-label';
+                    ultimateActiveLabel.appendChild(labelDiv);
+                     requestAnimationFrame(() => {
+                         labelDiv.classList.add('visible');
+                     });
+                }
+                const effect = activePowerUpEffects.ULTIMATE;
+                if(effect) {
+                    const percentage = (effect.timeLeft / effect.totalDuration);
+                    const ringHTML = `<svg class="timer-ring"><path class="timer-ring-fg" d="" style="stroke: url(#ultimate-gradient);"/></svg><span>Ultimate</span>`;
+                    labelDiv.innerHTML = ringHTML;
+
+                    requestAnimationFrame(() => {
+                        const w = labelDiv.offsetWidth;
+                        const h = labelDiv.offsetHeight;
+                        const r = parseFloat(getComputedStyle(labelDiv).borderRadius);
+                        const path = `M ${r},2 L ${w-r},2 A ${r-2},${r-2} 0 0 1 ${w-2},${r} L ${w-2},${h-r} A ${r-2},${r-2} 0 0 1 ${w-r},${h-2} L ${r},${h-2} A ${r-2},${r-2} 0 0 1 2,${h-r} L 2,${r} A ${r-2},${r-2} 0 0 1 ${r},2 Z`;
+                        const ringFg = labelDiv.querySelector('.timer-ring-fg');
+                        ringFg.setAttribute('d', path);
+                        const pathLength = ringFg.getTotalLength();
+
+                        if(pathLength > 0){
+                           ringFg.style.strokeDasharray = `${pathLength} ${pathLength}`;
+                           ringFg.style.strokeDashoffset = pathLength * (1 - percentage);
+                        }
+                    });
+                }
+            } else {
+                ultimateChargeIconContainer.classList.remove('hidden');
+                let labelDiv = ultimateActiveLabel.querySelector('.power-up-label');
+                if (labelDiv) {
+                    labelDiv.classList.remove('visible');
+                    setTimeout(() => labelDiv.remove(), 400);
+                }
+
+                const icons = ultimateChargeIconContainer.querySelectorAll('.ultimate-charge-icon');
+                icons.forEach((icon, index) => {
+                    icon.classList.toggle('active', index < ultimateChargeCount);
+                });
+            }
         }
 
         function updateDifficulty(deltaTime) { 
             difficultyTimer += deltaTime;
             if (difficultyTimer >= 10) {
-                 minSpawnIntervalMs = Math.max(30, minSpawnIntervalMs / 1.1); 
-                 maxSpawnIntervalMs = Math.max(100, maxSpawnIntervalMs / 1.1); 
-                 if (minSpawnIntervalMs >= maxSpawnIntervalMs) maxSpawnIntervalMs = minSpawnIntervalMs + 70; 
-                 minObstacleSpeed *= 1.025;
-                 maxObstacleSpeed *= 1.025; 
+                 minSpawnIntervalMs = Math.max(25, minSpawnIntervalMs / 1.05);
+                 maxSpawnIntervalMs = Math.max(100, maxSpawnIntervalMs / 1.05); 
+                 if (minSpawnIntervalMs >= maxSpawnIntervalMs) maxSpawnIntervalMs = minSpawnIntervalMs + 75; 
+                 // Peningkatan kecepatan dihapus sesuai permintaan
                  difficultyTimer -= 10;
             }
         }
@@ -757,3 +991,4 @@
     </script>
 </body>
 </html>
+
