@@ -632,11 +632,11 @@
             difficultyTimer = 0;
             armorDecayTimer = 0;
 
-            // Updated difficulty parameters
+            // UPDATED difficulty parameters
             minSpawnIntervalMs = 25; 
             maxSpawnIntervalMs = 1000; 
             minObstacleSpeed = 100; 
-            maxObstacleSpeed = 1000; 
+            maxObstacleSpeed = 500; // UPDATED as per request
             minPowerUpSpeed = 100;
             maxPowerUpSpeed = 500;
             
@@ -929,12 +929,21 @@
 
         function updateDifficulty(deltaTime) { 
             difficultyTimer += deltaTime;
-            if (difficultyTimer >= 10) {
-                 minSpawnIntervalMs = Math.max(25, minSpawnIntervalMs / 1.05);
-                 maxSpawnIntervalMs = Math.max(100, maxSpawnIntervalMs / 1.05); 
-                 if (minSpawnIntervalMs >= maxSpawnIntervalMs) maxSpawnIntervalMs = minSpawnIntervalMs + 75; 
+            // UPDATED: Peningkatan kesulitan setiap 20 detik
+            if (difficultyTimer >= 20) {
+                // UPDATED: Interval spawn dikurangi dengan membaginya 1.25, batas bawah baru
+                 minSpawnIntervalMs = Math.max(5, minSpawnIntervalMs / 1.25);
+                 maxSpawnIntervalMs = Math.max(50, maxSpawnIntervalMs / 1.25); 
+                 
+                 // Pemeriksaan keamanan untuk memastikan max > min
+                 if (minSpawnIntervalMs >= maxSpawnIntervalMs) {
+                    maxSpawnIntervalMs = minSpawnIntervalMs + 50; 
+                 }
+                 
                  // Peningkatan kecepatan dihapus sesuai permintaan
-                 difficultyTimer -= 10;
+                 
+                 // UPDATED: Reset timer ke 20
+                 difficultyTimer -= 20;
             }
         }
 
