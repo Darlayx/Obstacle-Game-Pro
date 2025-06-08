@@ -861,50 +861,59 @@
             resilienceValueDisplay.textContent = `${resiliencePercentage.toFixed(1).replace('.', ',')}%`;
             resilienceContainer.dataset.visible = resiliencePercentage > 0;
             
-            // --- NEW: Handle Ultimate UI visibility and animation ---
+            // --- REFACTORED: Handle Ultimate UI visibility and animation ---
             if (isUltimateActive) {
                 ultimateChargeIconContainer.classList.add('hidden');
-                
-                let labelDiv = ultimateActiveLabel.querySelector('.power-up-label');
+                let labelDiv = ultimateActiveLabel.querySelector('#ultimateActiveLabel-instance');
+
+                // Create the label only once when the ultimate is activated
                 if (!labelDiv) {
                     labelDiv = document.createElement('div');
                     labelDiv.className = 'power-up-label';
-                    labelDiv.id = 'ultimateActiveLabel-instance'; // for specific css styling
+                    labelDiv.id = 'ultimateActiveLabel-instance';
+                    labelDiv.innerHTML = `<svg class="timer-ring"><path class="timer-ring-fg" d="" style="stroke: url(#ultimate-gradient);"/></svg><span>Ultimate</span>`;
                     ultimateActiveLabel.appendChild(labelDiv);
-                    setTimeout(() => labelDiv.classList.add('visible'), 10);
+
+                    // Defer dimension calculation until next frame to ensure element is rendered
+                    requestAnimationFrame(() => {
+                        if (!document.body.contains(labelDiv)) return; // Safety check if element is removed
+                        const w = labelDiv.offsetWidth;
+                        const h = labelDiv.offsetHeight;
+                        const r = parseFloat(getComputedStyle(labelDiv).borderRadius) || 0;
+                        const sw = 4; // stroke-width
+                        const ring = labelDiv.querySelector('.timer-ring');
+                        ring.setAttribute('viewBox', `0 0 ${w} ${h}`);
+                        const path = `M ${r},${sw/2} L ${w-r},${sw/2} A ${r-sw/2},${r-sw/2} 0 0 1 ${w-sw/2},${r} L ${w-sw/2},${h-r} A ${r-sw/2},${r-sw/2} 0 0 1 ${w-r},${h-sw/2} L ${r},${h-sw/2} A ${r-sw/2},${r-sw/2} 0 0 1 ${sw/2},${h-r} L ${sw/2},${r} A ${r-sw/2},${r-sw/2} 0 0 1 ${r},${sw/2}`;
+                        
+                        const ringFg = labelDiv.querySelector('.timer-ring-fg');
+                        ringFg.setAttribute('d', path);
+                        const pathLength = ringFg.getTotalLength();
+                        if (pathLength > 0) {
+                            ringFg.dataset.pathLength = pathLength;
+                        }
+                        labelDiv.classList.add('visible');
+                    });
                 }
 
+                // Update the timer ring on every frame
                 const effect = activePowerUpEffects.ULTIMATE;
-                if(effect) {
-                    const percentage = (effect.timeLeft / effect.totalDuration);
-                    labelDiv.innerHTML = `<svg class="timer-ring"><path class="timer-ring-fg" d="" style="stroke: url(#ultimate-gradient);"/></svg><span>Ultimate</span>`;
-                    
-                    requestAnimationFrame(() => {
-                         if (!document.body.contains(labelDiv)) return; // Don't run if element is gone
-                         const w = labelDiv.offsetWidth;
-                         const h = labelDiv.offsetHeight;
-                         const r = parseFloat(getComputedStyle(labelDiv).borderRadius) || 0;
-                         const sw = 4;
-                         const ring = labelDiv.querySelector('.timer-ring');
-                         ring.setAttribute('viewBox', `0 0 ${w} ${h}`);
-                         const path = `M ${r},${sw/2} L ${w-r},${sw/2} A ${r-sw/2},${r-sw/2} 0 0 1 ${w-sw/2},${r} L ${w-sw/2},${h-r} A ${r-sw/2},${r-sw/2} 0 0 1 ${w-r},${h-sw/2} L ${r},${h-sw/2} A ${r-sw/2},${r-sw/2} 0 0 1 ${sw/2},${h-r} L ${sw/2},${r} A ${r-sw/2},${r-sw/2} 0 0 1 ${r},${sw/2}`;
-                         const ringFg = labelDiv.querySelector('.timer-ring-fg');
-                         ringFg.setAttribute('d', path);
-                         const pathLength = ringFg.getTotalLength();
+                if (effect && labelDiv) {
+                    const ringFg = labelDiv.querySelector('.timer-ring-fg');
+                    const pathLength = parseFloat(ringFg.dataset.pathLength);
 
-                         if(pathLength > 0){
-                            ringFg.style.strokeDasharray = `${pathLength} ${pathLength}`;
-                            ringFg.style.strokeDashoffset = pathLength * (1 - percentage);
-                         }
-                    });
+                    if (!isNaN(pathLength) && pathLength > 0) { // Check if path length is calculated
+                        const percentage = (effect.timeLeft / effect.totalDuration);
+                        ringFg.style.strokeDasharray = `${pathLength} ${pathLength}`;
+                        ringFg.style.strokeDashoffset = pathLength * (1 - percentage);
+                    }
                 }
             } else {
                 ultimateChargeIconContainer.classList.remove('hidden');
                 
-                let labelDiv = ultimateActiveLabel.querySelector('.power-up-label');
+                let labelDiv = ultimateActiveLabel.querySelector('#ultimateActiveLabel-instance');
                 if (labelDiv) {
                     labelDiv.classList.remove('visible');
-                    setTimeout(() => { if(labelDiv) labelDiv.remove() }, 400); // Remove after transition
+                    setTimeout(() => { if (labelDiv) labelDiv.remove(); }, 400); // Remove after transition
                 }
 
                 const icons = ultimateChargeIconContainer.querySelectorAll('.ultimate-charge-icon');
