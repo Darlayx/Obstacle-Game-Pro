@@ -66,12 +66,12 @@
             justify-content: space-between;
             align-items: flex-start;
             pointer-events: none; 
-            gap: 8px; /* Reduced gap between columns */
+            gap: 8px;
         }
         .ui-column {
             display: flex;
             flex-direction: column;
-            gap: 6px; /* Reduced gap between elements */
+            gap: 6px; 
             flex-basis: 0; 
             flex-grow: 1;
         }
@@ -79,19 +79,18 @@
         .ui-column.right { align-items: flex-end; }
 
         .ui-element { 
-            font-weight: 600; /* Bolder font */
-            padding: 5px 10px; /* Compact padding */
+            font-weight: 600; 
+            padding: 5px 10px;
             border-radius: var(--ui-border-radius-large); 
             box-shadow: var(--ui-shadow);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px); /* Blur effect */
+            backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: flex; 
             align-items: center;
             gap: 6px; 
             background-color: var(--ui-background-color);
             color: var(--ui-text-color);
-            /* Refined transition for all UI elements */
             transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
@@ -109,7 +108,7 @@
         #hpContainer {
             min-width: 130px; 
         }
-        /* HP status colors with updated transparency */
+        
         #hpContainer.status-safe { background-color: rgba(72, 187, 120, 0.5); color: white; }
         #hpContainer.status-warning { background-color: rgba(246, 224, 94, 0.75); color: var(--ui-text-color); }
         #hpContainer.status-critical { background-color: rgba(245, 101, 101, 1); color: white; }
@@ -127,16 +126,14 @@
             color: white;
         }
         #resilienceContainer {
-            background-color: rgba(205, 127, 50, 0.6); /* Bronze color */
+            background-color: rgba(205, 127, 50, 0.6);
             color: white;
         }
-        /* NEW: Absorb UI Styling */
         #absorbContainer {
-            background-color: rgba(72, 201, 176, 0.6); /* Teal color */
+            background-color: rgba(72, 201, 176, 0.6);
             color: white;
         }
 
-        /* Enhanced animation for disappearing elements */
         #armorContainer[data-visible="false"], 
         #resilienceContainer[data-visible="false"],
         #absorbContainer[data-visible="false"] {
@@ -146,17 +143,16 @@
             height: 0 !important;
             padding-top: 0 !important;
             padding-bottom: 0 !important;
-            margin-bottom: -6px; /* Negative margin to collapse space */
+            margin-bottom: -6px;
             overflow: hidden;
         }
         
-        /* Ultimate UI Area Fixed */
         #ultimateContainer {
             position: relative;
             min-width: 65px; 
             min-height: 28px;
             justify-content: center;
-            padding: 5px 10px; /* Consistent padding */
+            padding: 5px 10px;
         }
         #ultimateChargeIconContainer, #ultimateActiveLabel {
             position: absolute;
@@ -180,8 +176,6 @@
             transform: translate(-50%, -50%) scale(0.8);
             pointer-events: none;
         }
-
-        #ultimateActiveLabel { }
 
         #ultimateChargeIconContainer .ui-icon svg {
             width: clamp(14px, 2.2vw, 16px);
@@ -322,8 +316,11 @@
                 <symbol id="icon-time" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.47 10 10 10 10-4.47 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></symbol>
                 <symbol id="icon-medal" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
                 <symbol id="icon-resilience" viewBox="0 0 24 24"><path d="M12 2L4 5v5.11c0 5.23 3.55 9.93 8 11.89c4.45-1.96 8-6.66 8-11.89V5l-8-3zm-1 2.36l6 2.15v3.42c0 .9-.13 1.76-.38 2.58l-5.62-5.62V4.36zm2 15.28c-3.14-1.42-5-4.99-5-8.64V7.93l9 3.21v2.9c0 3.65-1.86 7.22-5 8.64h1z"/></symbol>
-                <!-- NEW: Icon for Absorb UI -->
-                <symbol id="icon-absorb" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2zm.001 18a8 8 0 1 1 7.999-8 8.01 8.01 0 0 1-7.999 8z M12 5.5l-4 4h3v6h2v-6h3l-4-4z"/></symbol>
+                <!-- UPDATED: New Absorb Icon for UI Consistency -->
+                <symbol id="icon-absorb-new" viewBox="0 0 24 24">
+                    <path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" fill-rule="evenodd" fill="currentColor"/>
+                    <path d="M12,4a8,8,0,0,0-8,8,7.9,7.9,0,0,0,2.3,5.7,8,8,0,0,1,11.4-11.4A7.9,7.9,0,0,0,12,4Z" fill-rule="evenodd" fill="currentColor" opacity="0.6"/>
+                </symbol>
                 
                 <linearGradient id="ultimate-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#9F7AEA" />
@@ -336,7 +333,6 @@
         <div id="settingsScreen" class="screen-overlay"><h2>Pengaturan</h2><div class="settings-group"><label for="sfxVolume">Volume Efek Suara:</label><div class="settings-control"><input type="range" id="sfxVolume" min="0" max="1" step="0.01" value="0.8"><button id="sfxToggle" class="toggle-button on">ON</button></div></div><div class="screen-button-container" style="margin-top: 30px;"><button id="deleteHighScoreButton" class="screen-button">Hapus Rekor</button><button id="backToMenuButton" class="screen-button">Kembali</button></div></div>
         <div id="confirmDeleteModal"><p>Apakah Anda yakin ingin menghapus rekor waktu tertinggi?</p><div class="confirm-buttons"><button id="confirmDeleteYes" class="screen-button modal-button-delete">Ya, Hapus</button><button id="confirmDeleteNo" class="screen-button modal-button-cancel">Batal</button></div></div>
         <div id="gameOverScreen" class="screen-overlay"><h2>Game Over!</h2><p id="finalScore">Waktu Bertahan: 0,0s</p><p id="gameOverHighScore">Rekor Waktu: 0,0s</p><div class="screen-button-container"><button id="restartButton" class="screen-button">Mulai Ulang</button></div></div>
-
 
         <canvas id="gameCanvas"></canvas>
         
@@ -356,9 +352,9 @@
                     <span class="ui-icon"><svg><use xlink:href="#icon-resilience"></use></svg></span>
                     <span id="resilienceValue" class="ui-value">0,0%</span>
                 </div>
-                <!-- NEW: Absorb UI Container -->
                 <div id="absorbContainer" class="ui-element" data-visible="false">
-                    <span class="ui-icon"><svg><use xlink:href="#icon-absorb"></use></svg></span>
+                    <!-- UPDATED Icon -->
+                    <span class="ui-icon"><svg><use xlink:href="#icon-absorb-new"></use></svg></span>
                     <span id="absorbValue" class="ui-value">0,0%</span>
                 </div>
                  <div id="activePowerUpUI"></div>
@@ -430,7 +426,7 @@
         const hpValueDisplay = document.getElementById('hpValue'); const hpBarInner = document.getElementById('hpBarInner');
         const armorContainer = document.getElementById('armorContainer'); const armorValueDisplay = document.getElementById('armorValue'); const armorBarInner = document.getElementById('armorBarInner');
         const resilienceContainer = document.getElementById('resilienceContainer'); const resilienceValueDisplay = document.getElementById('resilienceValue');
-        const absorbContainer = document.getElementById('absorbContainer'); const absorbValueDisplay = document.getElementById('absorbValue'); // NEW
+        const absorbContainer = document.getElementById('absorbContainer'); const absorbValueDisplay = document.getElementById('absorbValue');
         const ultimateContainer = document.getElementById('ultimateContainer');
         const ultimateChargeIconContainer = document.getElementById('ultimateChargeIconContainer');
         const ultimateActiveLabel = document.getElementById('ultimateActiveLabel');
@@ -441,10 +437,10 @@
 
         // --- GAME STATE VARIABLES ---
         let player, obstacles, currentScoreTime, highScoreTime, playerHP, playerArmor;
-        let resiliencePercentage, absorbPercentage; // UPDATED
+        let resiliencePercentage, absorbPercentage;
         let powerUpsOnScreen = [], activePowerUpEffects = {}, pendingPowerUpEffects = {};
         let animationFrameId, isGameOver = false, playerVelocityX = 0;
-        let difficultyTimer, armorDecayTimer, absorbDecayTimer; // NEW absorbDecayTimer
+        let difficultyTimer, armorDecayTimer, absorbDecayTimer;
         let minSpawnIntervalMs, maxSpawnIntervalMs, minObstacleSpeed, maxObstacleSpeed, minPowerUpSpeed, maxPowerUpSpeed;
         let playerHitEffectTimer = 0;
         
@@ -452,7 +448,7 @@
         let lastTime = 0;
 
         const PLAYER_DEFAULT_COLOR = '#34495E', PLAYER_HIT_COLOR = '#E74C3C';
-        const PLAYER_HIT_DURATION = 0.25; // in seconds
+        const PLAYER_HIT_DURATION = 0.25;
         let obstacleBaseRadius, powerUpObjectRadius;
         
         let ultimateChargeCount = 0;
@@ -471,7 +467,6 @@
         
         const POWER_UP_TYPES = {
             RESILIENCE:  { id: 'RESILIENCE',  name: 'Resilience',  color: '#CD7F32', draw: drawResilienceShape,  duration: 90, minSpawn: 10,  maxSpawn: 180, onCollect: activateResilience,  onExpire: deactivateResilience,  sfxCollect: () => { if(sfxOn && soundsReady) resilienceActivateSynth.triggerAttackRelease("A2", "0.2s", Tone.now()); }},
-            // UPDATED: Absorb power-up definition
             ABSORB:      { id: 'ABSORB',      name: 'Absorb',      color: '#48C9B0', draw: drawAbsorbShape,      duration: 0, minSpawn: 15,  maxSpawn: 90, onCollect: activateAbsorb, sfxCollect: () => { if(sfxOn && soundsReady) absorbActivateSynth.triggerAttackRelease("G3", "0.35s", Tone.now(), 1.0); } },
             SLOW:        { id: 'SLOW',        name: 'Slow',        color: '#5499C7', draw: drawSlowShape,        duration: 30, minSpawn: 30,  maxSpawn: 120, onCollect: activateSlow,        onExpire: deactivateSlow,        sfxCollect: () => { if(sfxOn && soundsReady) { slowActivateSynth.triggerAttack("G2", Tone.now()); slowActivateSynth.frequency.rampTo("F#2", 0.5, Tone.now() + 0.1); slowActivateSynth.triggerRelease(Tone.now() + 0.6); }}},
             MINIATURIZE: { id: 'MINIATURIZE', name: 'Miniaturize', color: '#A569BD', draw: drawMiniaturizeShape, duration: 30, minSpawn: 30,  maxSpawn: 210, onCollect: activateMiniaturize, onExpire: deactivateMiniaturize, sfxCollect: () => { if(sfxOn && soundsReady) { miniActivateSynth.triggerAttackRelease("A6", "0.05s", Tone.now(), 0.7); miniActivateSynth.triggerAttackRelease("D7", "0.05s", Tone.now() + 0.04, 0.6); }}},
@@ -500,7 +495,6 @@
             }
         }
         
-        // UPDATED: Absorb mechanic
         function activateAbsorb() {
             absorbPercentage = Math.min(100, absorbPercentage + 20);
             updateUIDisplay();
@@ -515,14 +509,10 @@
         function activatePolymorph() { activatePowerUp('POLYMORPH', { timeLeft: POWER_UP_TYPES.POLYMORPH.duration, totalDuration: POWER_UP_TYPES.POLYMORPH.duration }); }
         function deactivatePolymorph() { delete activePowerUpEffects.POLYMORPH; }
 
-        // UPDATED: Resilience mechanic and bug fix
         function activateResilience() {
-            // Check if Resilience is already running or pending (due to Ultimate)
             if (!activePowerUpEffects.RESILIENCE && !pendingPowerUpEffects.RESILIENCE) {
-                // Only set to 10% if it's a fresh activation
                 resiliencePercentage = 10;
             }
-            // Now, always (re)activate the timer. This refreshes duration without adding %
             activatePowerUp('RESILIENCE', {
                 timeLeft: POWER_UP_TYPES.RESILIENCE.duration,
                 totalDuration: POWER_UP_TYPES.RESILIENCE.duration
@@ -554,13 +544,11 @@
             updateUIDisplay();
         }
         
-        // UPDATED: Ultimate Effects
         function activateUltimateEffects() {
             activatePowerUp('ULTIMATE', { timeLeft: POWER_UP_TYPES.ULTIMATE.duration, totalDuration: POWER_UP_TYPES.ULTIMATE.duration, name: "Ultimate" });
             playerHP = 1000;
             playerArmor = 1000;
-            absorbPercentage = Math.min(100, absorbPercentage + 20); // Ultimate now grants Absorb %
-            // Resilience percentage is no longer boosted by Ultimate
+            absorbPercentage = Math.min(100, absorbPercentage + 20);
             updateUIDisplay();
         }
 
@@ -568,11 +556,9 @@
             isUltimateActive = false; 
             delete activePowerUpEffects.ULTIMATE;
 
-            // If resilience wasn't pending, it gets reset.
             if (!pendingPowerUpEffects.RESILIENCE) { 
                 resiliencePercentage = 0; 
             }
-            // Restore any pending effects
             for (const id in pendingPowerUpEffects) { activePowerUpEffects[id] = { ...pendingPowerUpEffects[id] }; }
             pendingPowerUpEffects = {}; updateUIDisplay();
         }
@@ -632,7 +618,7 @@
             playerHP = 1000; 
             playerArmor = 1000; 
             resiliencePercentage = 0; 
-            absorbPercentage = 0; // NEW: Reset absorb percentage
+            absorbPercentage = 0;
             
             playerHitEffectTimer = 0;
             obstacles = []; currentScoreTime = 0; 
@@ -640,7 +626,7 @@
 
             difficultyTimer = 0;
             armorDecayTimer = 0;
-            absorbDecayTimer = 0; // NEW: Reset absorb decay timer
+            absorbDecayTimer = 0;
 
             minSpawnIntervalMs = 25; 
             maxSpawnIntervalMs = 1000; 
@@ -771,7 +757,7 @@
                         const w = labelDiv.offsetWidth;
                         const h = labelDiv.offsetHeight;
                         const r = parseFloat(getComputedStyle(labelDiv).borderRadius) || 0;
-                        const sw = 4; // stroke-width
+                        const sw = 4;
                         const ring = labelDiv.querySelector('.timer-ring');
                         ring.setAttribute('viewBox', `0 0 ${w} ${h}`); 
                         const path = `M ${r},${sw/2} L ${w-r},${sw/2} A ${r-sw/2},${r-sw/2} 0 0 1 ${w-sw/2},${r} L ${w-sw/2},${h-r} A ${r-sw/2},${r-sw/2} 0 0 1 ${w-r},${h-sw/2} L ${r},${h-sw/2} A ${r-sw/2},${r-sw/2} 0 0 1 ${sw/2},${h-r} L ${sw/2},${r} A ${r-sw/2},${r-sw/2} 0 0 1 ${r},${sw/2}`;
@@ -798,7 +784,6 @@
         }
         
         function updateArmorAndAbsorb(deltaTime) { 
-            // Armor Decay
             armorDecayTimer += deltaTime;
             if (armorDecayTimer >= 1) {
                 if (playerArmor > 0 && !isUltimateActive) {
@@ -807,14 +792,13 @@
                 armorDecayTimer -= 1; 
             }
 
-            // NEW: Absorb Decay
+            // UPDATED: Absorb Decay every 15 seconds
             absorbDecayTimer += deltaTime;
-            if (absorbDecayTimer >= 3) {
+            if (absorbDecayTimer >= 15) {
                 if (absorbPercentage > 0) {
-                    // Decay by 5% every 3 seconds
                     absorbPercentage = Math.max(0, absorbPercentage - 5);
                 }
-                absorbDecayTimer -= 3;
+                absorbDecayTimer -= 15;
             }
         }
 
@@ -823,17 +807,14 @@
         function handleCollision(rawDamageAmount) {
             let currentDamage = rawDamageAmount;
 
-            // Step 1: Apply damage reduction from Resilience.
             if (resiliencePercentage > 0) {
                 currentDamage *= (1 - (resiliencePercentage / 100));
             }
 
-            // Step 2: NEW - Apply damage reduction from Absorb.
             if (absorbPercentage > 0) {
                 currentDamage *= (1 - (absorbPercentage / 100));
             }
 
-            // Step 3: Distribute final damage to armor and HP.
             let damageToArmor = 0;
             let damageToHp = 0;
             if (playerArmor > 0) {
@@ -852,13 +833,11 @@
 
             playerHP -= damageToHp;
             
-            // Step 4: After damage is dealt, convert raw damage to resilience if effect is active.
-            if (activePowerUpEffects.RESILIENCE) {
+            if (activePowerUpEffects.RESILIENCE || pendingPowerUpEffects.RESILIENCE) {
                 const resilienceToAdd = rawDamageAmount / 100;
                 resiliencePercentage = Math.min(80, resiliencePercentage + resilienceToAdd);
             }
 
-            // Final updates
             playerHP = Math.max(0, playerHP);
             playerHitEffectTimer = PLAYER_HIT_DURATION;
             if (sfxOn && soundsReady) hitSynth.triggerAttackRelease(0.08, Tone.now());
@@ -866,7 +845,7 @@
             updateUIDisplay();
         }
 
-        function gameOver() { isGameOver = true; cancelAnimationFrame(animationFrameId); playerVelocityX = 0; if (sfxOn && soundsReady) gameOverSynth.triggerAttackRelease("G2", "1.2n", Tone.now()); if (isUltimateActive && POWER_UP_TYPES.ULTIMATE.onExpire) POWER_UP_TYPES.ULTIMATE.onExpire(); const activeEffectKeys = Object.keys(activePowerUpEffects); activeEffectKeys.forEach(typeId => { const powerUpDef = POWER_UP_TYPES[typeId]; if (powerUpDef && powerUpDef.onExpire && typeId !== 'ULTIMATE') powerUpDef.onExpire(); }); activePowerUpEffects = {}; pendingPowerUpEffects = {}; isUltimateActive = false; resiliencePercentage = 0; if (currentScoreTime > highScoreTime) { highScoreTime = currentScoreTime; localStorage.setItem('obstacleGameHighScoreTime', highScoreTime.toString()); } finalScoreDisplay.textContent = `Waktu Bertahan: ${formatTime(currentScoreTime)}`; gameOverHighScoreDisplay.textContent = `Rekor Waktu: ${formatTime(highScoreTime)}`; gameOverScreen.classList.add('active'); leftControl.style.display = 'none'; rightControl.style.display = 'none'; activePowerUpUIDiv.innerHTML = ''; }
+        function gameOver() { isGameOver = true; cancelAnimationFrame(animationFrameId); playerVelocityX = 0; if (sfxOn && soundsReady) gameOverSynth.triggerAttackRelease("G2", "1.2n", Tone.now()); if (isUltimateActive && POWER_UP_TYPES.ULTIMATE.onExpire) POWER_UP_TYPES.ULTIMATE.onExpire(); const activeEffectKeys = Object.keys(activePowerUpEffects); activeEffectKeys.forEach(typeId => { const powerUpDef = POWER_UP_TYPES[typeId]; if (powerUpDef && powerUpDef.onExpire && typeId !== 'ULTIMATE') powerUpDef.onExpire(); }); activePowerUpEffects = {}; pendingPowerUpEffects = {}; isUltimateActive = false; resiliencePercentage = 0; absorbPercentage = 0; if (currentScoreTime > highScoreTime) { highScoreTime = currentScoreTime; localStorage.setItem('obstacleGameHighScoreTime', highScoreTime.toString()); } finalScoreDisplay.textContent = `Waktu Bertahan: ${formatTime(currentScoreTime)}`; gameOverHighScoreDisplay.textContent = `Rekor Waktu: ${formatTime(highScoreTime)}`; gameOverScreen.classList.add('active'); leftControl.style.display = 'none'; rightControl.style.display = 'none'; activePowerUpUIDiv.innerHTML = ''; }
         
         function updateUIDisplay() {
             scoreValueDisplay.textContent = formatTime(currentScoreTime);
@@ -885,7 +864,6 @@
             resilienceValueDisplay.textContent = `${resiliencePercentage.toFixed(1).replace('.', ',')}%`;
             resilienceContainer.dataset.visible = resiliencePercentage > 0;
 
-            // NEW: Update Absorb UI
             absorbValueDisplay.textContent = `${absorbPercentage.toFixed(1).replace('.', ',')}%`;
             absorbContainer.dataset.visible = absorbPercentage > 0;
             
@@ -966,7 +944,7 @@
             currentScoreTime += deltaTime * 1000;
 
             updateDifficulty(deltaTime); 
-            updateArmorAndAbsorb(deltaTime); // UPDATED function name
+            updateArmorAndAbsorb(deltaTime);
             updateActivePowerUpEffects(deltaTime); 
             managePowerUpSpawning(deltaTime); 
             
