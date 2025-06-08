@@ -454,16 +454,16 @@
         let isUltimateActive = false;
         
         // --- CONSTANTS AND DEFINITIONS ---
+        // UPDATED: Obstacle damage values
         const OBSTACLE_SHAPES = [ 
             { type: 'circle',   sides: 0, damage: 20,  color: '#FFEB3B' }, 
-            { type: 'heptagon', sides: 7, damage: 40,  color: '#FFC107' }, 
-            { type: 'hexagon',  sides: 6, damage: 70,  color: '#FF9800' }, 
-            { type: 'pentagon', sides: 5, damage: 120, color: '#F4511E' }, 
-            { type: 'square',   sides: 4, damage: 200, color: '#E53935' }, 
-            { type: 'triangle', sides: 3, damage: 300, color: '#B71C1C' }
+            { type: 'heptagon', sides: 7, damage: 60,  color: '#FFC107' }, 
+            { type: 'hexagon',  sides: 6, damage: 120, color: '#FF9800' }, 
+            { type: 'pentagon', sides: 5, damage: 200, color: '#F4511E' }, 
+            { type: 'square',   sides: 4, damage: 400, color: '#E53935' }, 
+            { type: 'triangle', sides: 3, damage: 1000, color: '#B71C1C' }
         ];
         
-        // UPDATED: All power-up values
         const POWER_UP_TYPES = {
             HEAL:        { id: 'HEAL',        name: 'Heal',        color: '#2ECC71', draw: drawHealShape,        duration: 0,  minSpawn: 1,   maxSpawn: 20,  onCollect: activateHeal, sfxCollect: () => { if(sfxOn && soundsReady) { healActivateSynth.triggerAttackRelease("C5", "0.4s", Tone.now(), 0.8); healActivateSynth.triggerAttackRelease("G5", "0.4s", Tone.now() + 0.15, 0.7); }}},
             ABSORB:      { id: 'ABSORB',      name: 'Absorb',      color: '#48C9B0', draw: drawAbsorbShape,      duration: 0, minSpawn: 15,  maxSpawn: 90, onCollect: activateAbsorb, sfxCollect: () => { if(sfxOn && soundsReady) absorbActivateSynth.triggerAttackRelease("G3", "0.35s", Tone.now(), 1.0); } },
@@ -495,7 +495,7 @@
         }
         
         function activateAbsorb() {
-            absorbPercentage = Math.min(80, absorbPercentage + 20); // UPDATED: Max 80%
+            absorbPercentage = Math.min(80, absorbPercentage + 20);
             updateUIDisplay();
         }
         
@@ -654,11 +654,32 @@
         
         function updatePlayer(deltaTime) { player.x += playerVelocityX * deltaTime; if (player.x < 0) player.x = 0; if (player.x + player.width > canvas.width) player.x = canvas.width - player.width; if (playerHitEffectTimer > 0) playerHitEffectTimer -= deltaTime; }
         
-        function spawnObstacle() { 
-            const x = Math.random() * (canvas.width - obstacleBaseRadius * 2) + obstacleBaseRadius; 
-            const y = -obstacleBaseRadius; 
-            let shapeDetails = OBSTACLE_SHAPES[Math.floor(Math.random() * OBSTACLE_SHAPES.length)]; 
+        // UPDATED: spawnObstacle function with weighted probability
+        function spawnObstacle() {
+            const x = Math.random() * (canvas.width - obstacleBaseRadius * 2) + obstacleBaseRadius;
+            const y = -obstacleBaseRadius;
 
+            const weightedShapes = [
+                { shape: OBSTACLE_SHAPES[0], weight: 30 }, // circle
+                { shape: OBSTACLE_SHAPES[1], weight: 25 }, // heptagon
+                { shape: OBSTACLE_SHAPES[2], weight: 20 }, // hexagon
+                { shape: OBSTACLE_SHAPES[3], weight: 15 }, // pentagon
+                { shape: OBSTACLE_SHAPES[4], weight: 7 },  // square
+                { shape: OBSTACLE_SHAPES[5], weight: 3 }   // triangle
+            ];
+
+            const totalWeight = weightedShapes.reduce((sum, item) => sum + item.weight, 0);
+            let random = Math.random() * totalWeight;
+            let chosenShape;
+
+            for (const item of weightedShapes) {
+                random -= item.weight;
+                if (random <= 0) {
+                    chosenShape = item.shape;
+                    break;
+                }
+            }
+            
             let effectiveMinSpeed = minObstacleSpeed;
             let effectiveMaxSpeed = maxObstacleSpeed;
 
@@ -667,9 +688,10 @@
                 effectiveMaxSpeed *= 0.5;
             }
 
-            let speed = Math.random() * (effectiveMaxSpeed - effectiveMinSpeed) + effectiveMinSpeed; 
-            obstacles.push({ x, y, speed, shapeDetails: shapeDetails, damage: shapeDetails.damage, rotation: Math.random() * Math.PI * 2 }); 
+            let speed = Math.random() * (effectiveMaxSpeed - effectiveMinSpeed) + effectiveMinSpeed;
+            obstacles.push({ x, y, speed, shapeDetails: chosenShape, damage: chosenShape.damage, rotation: Math.random() * Math.PI * 2 });
         }
+
 
         function updateObstacles(deltaTime) { obstacles.forEach((obstacle, index) => { obstacle.y += obstacle.speed * deltaTime; let currentRadius = obstacleBaseRadius * ((activePowerUpEffects.MINIATURIZE) ? (1/1.5) : 1); if (obstacle.y - currentRadius > canvas.height) obstacles.splice(index, 1); });}
         
@@ -791,7 +813,6 @@
                 armorDecayTimer -= 1; 
             }
 
-            // UPDATED: Absorb Decay every 15 seconds, PAUSED during Ultimate
             if (!isUltimateActive) {
                 absorbDecayTimer += deltaTime;
                 if (absorbDecayTimer >= 15) {
