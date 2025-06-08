@@ -316,8 +316,7 @@
                 <symbol id="icon-time" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.47 10 10 10 10-4.47 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></symbol>
                 <symbol id="icon-medal" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
                 <symbol id="icon-resilience" viewBox="0 0 24 24"><path d="M12 2L4 5v5.11c0 5.23 3.55 9.93 8 11.89c4.45-1.96 8-6.66 8-11.89V5l-8-3zm-1 2.36l6 2.15v3.42c0 .9-.13 1.76-.38 2.58l-5.62-5.62V4.36zm2 15.28c-3.14-1.42-5-4.99-5-8.64V7.93l9 3.21v2.9c0 3.65-1.86 7.22-5 8.64h1z"/></symbol>
-                <!-- UPDATED: New Absorb Icon for UI Consistency -->
-                <symbol id="icon-absorb-new" viewBox="0 0 24 24">
+                <symbol id="icon-absorb" viewBox="0 0 24 24">
                     <path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" fill-rule="evenodd" fill="currentColor"/>
                     <path d="M12,4a8,8,0,0,0-8,8,7.9,7.9,0,0,0,2.3,5.7,8,8,0,0,1,11.4-11.4A7.9,7.9,0,0,0,12,4Z" fill-rule="evenodd" fill="currentColor" opacity="0.6"/>
                 </symbol>
@@ -353,8 +352,7 @@
                     <span id="resilienceValue" class="ui-value">0,0%</span>
                 </div>
                 <div id="absorbContainer" class="ui-element" data-visible="false">
-                    <!-- UPDATED Icon -->
-                    <span class="ui-icon"><svg><use xlink:href="#icon-absorb-new"></use></svg></span>
+                    <span class="ui-icon"><svg><use xlink:href="#icon-absorb"></use></svg></span>
                     <span id="absorbValue" class="ui-value">0,0%</span>
                 </div>
                  <div id="activePowerUpUI"></div>
@@ -465,15 +463,16 @@
             { type: 'triangle', sides: 3, damage: 300, color: '#B71C1C' }
         ];
         
+        // UPDATED: All power-up values
         const POWER_UP_TYPES = {
-            RESILIENCE:  { id: 'RESILIENCE',  name: 'Resilience',  color: '#CD7F32', draw: drawResilienceShape,  duration: 90, minSpawn: 10,  maxSpawn: 180, onCollect: activateResilience,  onExpire: deactivateResilience,  sfxCollect: () => { if(sfxOn && soundsReady) resilienceActivateSynth.triggerAttackRelease("A2", "0.2s", Tone.now()); }},
+            HEAL:        { id: 'HEAL',        name: 'Heal',        color: '#2ECC71', draw: drawHealShape,        duration: 0,  minSpawn: 1,   maxSpawn: 20,  onCollect: activateHeal, sfxCollect: () => { if(sfxOn && soundsReady) { healActivateSynth.triggerAttackRelease("C5", "0.4s", Tone.now(), 0.8); healActivateSynth.triggerAttackRelease("G5", "0.4s", Tone.now() + 0.15, 0.7); }}},
             ABSORB:      { id: 'ABSORB',      name: 'Absorb',      color: '#48C9B0', draw: drawAbsorbShape,      duration: 0, minSpawn: 15,  maxSpawn: 90, onCollect: activateAbsorb, sfxCollect: () => { if(sfxOn && soundsReady) absorbActivateSynth.triggerAttackRelease("G3", "0.35s", Tone.now(), 1.0); } },
-            SLOW:        { id: 'SLOW',        name: 'Slow',        color: '#5499C7', draw: drawSlowShape,        duration: 30, minSpawn: 30,  maxSpawn: 120, onCollect: activateSlow,        onExpire: deactivateSlow,        sfxCollect: () => { if(sfxOn && soundsReady) { slowActivateSynth.triggerAttack("G2", Tone.now()); slowActivateSynth.frequency.rampTo("F#2", 0.5, Tone.now() + 0.1); slowActivateSynth.triggerRelease(Tone.now() + 0.6); }}},
-            MINIATURIZE: { id: 'MINIATURIZE', name: 'Miniaturize', color: '#A569BD', draw: drawMiniaturizeShape, duration: 30, minSpawn: 30,  maxSpawn: 210, onCollect: activateMiniaturize, onExpire: deactivateMiniaturize, sfxCollect: () => { if(sfxOn && soundsReady) { miniActivateSynth.triggerAttackRelease("A6", "0.05s", Tone.now(), 0.7); miniActivateSynth.triggerAttackRelease("D7", "0.05s", Tone.now() + 0.04, 0.6); }}},
-            POLYMORPH:   { id: 'POLYMORPH',   name: 'Polymorph',   color: '#5D6D7E', draw: drawPolymorphShape,   duration: 30, minSpawn: 30,  maxSpawn: 300, onCollect: activatePolymorph,   onExpire: deactivatePolymorph,   sfxCollect: () => { if(sfxOn && soundsReady) polyActivateSynth.triggerAttackRelease(["C4", "Eb4", "G4", "Bb4"], "0.3s", Tone.now()); }},
-            SHIELD:      { id: 'SHIELD',      name: 'Shield',      color: '#4FC3F7', draw: drawShieldShapeModern,duration: 0,  minSpawn: 60,  maxSpawn: 300, onCollect: activateShield,      sfxCollect: () => { if(sfxOn && soundsReady) shieldActivateSynth.triggerAttackRelease(0.2, Tone.now()); }},
-            HEAL:        { id: 'HEAL',        name: 'Heal',        color: '#2ECC71', draw: drawHealShape,        duration: 0,  minSpawn: 1,   maxSpawn: 30,  onCollect: activateHeal,        sfxCollect: () => { if(sfxOn && soundsReady) { healActivateSynth.triggerAttackRelease("C5", "0.4s", Tone.now(), 0.8); healActivateSynth.triggerAttackRelease("G5", "0.4s", Tone.now() + 0.15, 0.7); }}},
-            CHARGE_ULTIMATE: { id: 'CHARGE_ULTIMATE', name: 'Ult Charge',  color: '#BF55EC', draw: drawChargeUltimateShapeModern, duration: 0, minSpawn: 15,   maxSpawn: 150, onCollect: collectUltimateCharge, sfxCollect: () => { if(sfxOn && soundsReady) chargeUltimateSynth.triggerAttackRelease("C5", "0.1s", Tone.now(), 0.6); }},
+            SHIELD:      { id: 'SHIELD',      name: 'Shield',      color: '#4FC3F7', draw: drawShieldShapeModern,duration: 0,  minSpawn: 60,  maxSpawn: 200, onCollect: activateShield, sfxCollect: () => { if(sfxOn && soundsReady) shieldActivateSynth.triggerAttackRelease(0.2, Tone.now()); }},
+            CHARGE_ULTIMATE: { id: 'CHARGE_ULTIMATE', name: 'Ult Charge',  color: '#BF55EC', draw: drawChargeUltimateShapeModern, duration: 0, minSpawn: 10,   maxSpawn: 100, onCollect: collectUltimateCharge, sfxCollect: () => { if(sfxOn && soundsReady) chargeUltimateSynth.triggerAttackRelease("C5", "0.1s", Tone.now(), 0.6); }},
+            RESILIENCE:  { id: 'RESILIENCE',  name: 'Resilience',  color: '#CD7F32', draw: drawResilienceShape,  duration: 90, minSpawn: 10,  maxSpawn: 150, onCollect: activateResilience,  onExpire: deactivateResilience,  sfxCollect: () => { if(sfxOn && soundsReady) resilienceActivateSynth.triggerAttackRelease("A2", "0.2s", Tone.now()); }},
+            SLOW:        { id: 'SLOW',        name: 'Slow',        color: '#5499C7', draw: drawSlowShape,        duration: 30, minSpawn: 30,  maxSpawn: 80, onCollect: activateSlow,        onExpire: deactivateSlow,        sfxCollect: () => { if(sfxOn && soundsReady) { slowActivateSynth.triggerAttack("G2", Tone.now()); slowActivateSynth.frequency.rampTo("F#2", 0.5, Tone.now() + 0.1); slowActivateSynth.triggerRelease(Tone.now() + 0.6); }}},
+            MINIATURIZE: { id: 'MINIATURIZE', name: 'Miniaturize', color: '#A569BD', draw: drawMiniaturizeShape, duration: 30, minSpawn: 30,  maxSpawn: 150, onCollect: activateMiniaturize, onExpire: deactivateMiniaturize, sfxCollect: () => { if(sfxOn && soundsReady) { miniActivateSynth.triggerAttackRelease("A6", "0.05s", Tone.now(), 0.7); miniActivateSynth.triggerAttackRelease("D7", "0.05s", Tone.now() + 0.04, 0.6); }}},
+            POLYMORPH:   { id: 'POLYMORPH',   name: 'Polymorph',   color: '#5D6D7E', draw: drawPolymorphShape,   duration: 15, minSpawn: 15,  maxSpawn: 120, onCollect: activatePolymorph,   onExpire: deactivatePolymorph,   sfxCollect: () => { if(sfxOn && soundsReady) polyActivateSynth.triggerAttackRelease(["C4", "Eb4", "G4", "Bb4"], "0.3s", Tone.now()); }},
             ULTIMATE:    { id: 'ULTIMATE',    name: 'Ultimate',    color: '#007bff', draw: () => {},               duration: 30, onActivate: activateUltimateEffects, onExpire: deactivateUltimateEffects, sfxActivate: () => { if(sfxOn && soundsReady) ultimateActivateSynth.triggerAttackRelease(["C3", "G3", "C4"], "1.5s", Tone.now()); }}
         };
         
@@ -496,7 +495,7 @@
         }
         
         function activateAbsorb() {
-            absorbPercentage = Math.min(100, absorbPercentage + 20);
+            absorbPercentage = Math.min(80, absorbPercentage + 20); // UPDATED: Max 80%
             updateUIDisplay();
         }
         
@@ -548,7 +547,7 @@
             activatePowerUp('ULTIMATE', { timeLeft: POWER_UP_TYPES.ULTIMATE.duration, totalDuration: POWER_UP_TYPES.ULTIMATE.duration, name: "Ultimate" });
             playerHP = 1000;
             playerArmor = 1000;
-            absorbPercentage = Math.min(100, absorbPercentage + 20);
+            absorbPercentage = Math.min(80, absorbPercentage + 20);
             updateUIDisplay();
         }
 
@@ -792,13 +791,15 @@
                 armorDecayTimer -= 1; 
             }
 
-            // UPDATED: Absorb Decay every 15 seconds
-            absorbDecayTimer += deltaTime;
-            if (absorbDecayTimer >= 15) {
-                if (absorbPercentage > 0) {
-                    absorbPercentage = Math.max(0, absorbPercentage - 5);
+            // UPDATED: Absorb Decay every 15 seconds, PAUSED during Ultimate
+            if (!isUltimateActive) {
+                absorbDecayTimer += deltaTime;
+                if (absorbDecayTimer >= 15) {
+                    if (absorbPercentage > 0) {
+                        absorbPercentage = Math.max(0, absorbPercentage - 5);
+                    }
+                    absorbDecayTimer -= 15;
                 }
-                absorbDecayTimer -= 15;
             }
         }
 
