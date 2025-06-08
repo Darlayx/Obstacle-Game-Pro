@@ -267,13 +267,13 @@
         }
 
         #ultimateActiveLabel-instance {
-            background: linear-gradient(135deg, rgba(126, 43, 226, 0.7), rgba(0, 123, 255, 0.7));
+            background: linear-gradient(135deg, rgba(126, 43, 226, 0.8), rgba(0, 123, 255, 0.8));
             color: white;
             font-weight: 700;
         }
         
-        /* --- Screens & Modals --- */
-        .screen-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; border-radius: 28px; padding: 25px; box-sizing: border-box; opacity: 0; visibility: hidden; transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); backdrop-filter: blur(5px); }
+        /* --- Screens & Modals (REFINED) --- */
+        .screen-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; border-radius: 28px; padding: 25px; box-sizing: border-box; opacity: 0; visibility: hidden; transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
         .screen-overlay.active { opacity: 1; visibility: visible; }
         #mainMenuScreen { background-color: rgba(26, 32, 44, 0.94); z-index: 10; }
         #gameOverScreen { background-color: rgba(199, 0, 57, 0.94); z-index: 9; }
@@ -289,22 +289,23 @@
         #restartButton { background: linear-gradient(45deg, #2196F3, #64B5F6); } #restartButton:hover { background: linear-gradient(45deg, #1976D2, #42A5F5); }
         #deleteHighScoreButton { background: linear-gradient(45deg, #F44336, #E57373); font-size: clamp(12.5px, 2.9vw, 15.5px); padding: 11px 22px; } #deleteHighScoreButton:hover { background: linear-gradient(45deg, #D32F2F, #EF5350); }
         #backToMenuButton { background: linear-gradient(45deg, #757575, #9E9E9E); } #backToMenuButton:hover { background: linear-gradient(45deg, #616161, #757575); }
-        .settings-group { margin-bottom: 22px; width: 100%; } .settings-group label { display: block; margin-bottom: 9px; font-weight: 500; font-size: clamp(13.5px, 2.9vw, 16.5px); }
+        .settings-group { margin-bottom: 22px; width: 100%; max-width: 320px; text-align: left;} .settings-group label { display: block; margin-bottom: 9px; font-weight: 500; font-size: clamp(13.5px, 2.9vw, 16.5px); }
         .settings-control { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         .settings-control input[type="range"] { flex-grow: 1; -webkit-appearance: none; appearance: none; width: 100%; height: 10px; background: #4A5568; border-radius: 5px; outline: none; opacity: 0.9; transition: opacity .15s ease-in-out; cursor: pointer; }
         .settings-control input[type="range"]:hover { opacity: 1; }
         .settings-control input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #E2E8F0; border-radius: 50%; cursor: pointer; border: 2px solid #2D3748; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .settings-control input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: #E2E8F0; border-radius: 50%; cursor: pointer; border: 2px solid #2D3748; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .toggle-button { padding: 10px 18px; font-size: clamp(13px, 2.8vw, 15px); font-weight: 500; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease-out, transform 0.1s ease-out, box-shadow 0.2s ease-out; min-width: 70px; text-align: center; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+        .toggle-button { padding: 10px 18px; font-size: clamp(13px, 2.8vw, 15px); font-weight: 500; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease-out, transform 0.1s ease-out, box-shadow 0.2s ease-out; min-width: 70px; text-align: center; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.15); text-transform: uppercase; }
         .toggle-button.on { background-color: #48BB78; } .toggle-button.off { background-color: #F56565; }
         .toggle-button:hover { transform: translateY(-1.5px); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
         #confirmDeleteModal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(40, 40, 50, 0.97); padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 100; display: none; width: 90%; max-width: 350px; color: white; }
         #confirmDeleteModal p { font-size: clamp(14px, 3vw, 17px); margin-bottom: 20px; }
         .confirm-buttons { display: flex; justify-content: space-around; gap: 10px; }
-        .modal-button-delete { background: linear-gradient(45deg, #E53E3E, #FC8181) !important; } .modal-button-delete:hover { background: linear-gradient(45deg, #C53030, #F56565) !important; }
-        .modal-button-cancel { background: linear-gradient(45deg, #718096, #A0AEC0) !important; } .modal-button-cancel:hover { background: linear-gradient(45deg, #4A5568, #718096) !important; }
+        .modal-button-delete { background: linear-gradient(45deg, #E53E3E, #FC8181); } .modal-button-delete:hover { background: linear-gradient(45deg, #C53030, #F56565); }
+        .modal-button-cancel { background: linear-gradient(45deg, #718096, #A0AEC0); } .modal-button-cancel:hover { background: linear-gradient(45deg, #4A5568, #718096); }
         #leftControl, #rightControl { position: absolute; top: 0; width: 50%; height: 100%; cursor: pointer; z-index: 1; }
         #leftControl { left: 0; } #rightControl { right: 0; }
+
     </style>
 </head>
 <body>
@@ -316,7 +317,8 @@
                 <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></symbol>
                 <symbol id="icon-bolt" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></symbol>
                 <symbol id="icon-time" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.47 10 10 10 10-4.47 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></symbol>
-                <symbol id="icon-medal" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5,1.1L15,4.6L11.5,1.1L8,4.6L4.5,1.1L1,4.6V10c0,6.1,4.9,11,11,11s11-4.9,11-10V4.6L18.5,1.1z M12,14.5l-2.5,1.3l0.5-2.8 l-2-2l2.8-0.4L12,8l1.2,2.6l2.8,0.4l-2,2l0.5,2.8L12,14.5z"/></symbol>
+                <!-- UPDATED MEDAL ICON to a star, a universal symbol for achievement -->
+                <symbol id="icon-medal" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
                 <symbol id="icon-resilience" viewBox="0 0 24 24"><path d="M12 2L4 5v5.11c0 5.23 3.55 9.93 8 11.89c4.45-1.96 8-6.66 8-11.89V5l-8-3zm-1 2.36l6 2.15v3.42c0 .9-.13 1.76-.38 2.58l-5.62-5.62V4.36zm2 15.28c-3.14-1.42-5-4.99-5-8.64V7.93l9 3.21v2.9c0 3.65-1.86 7.22-5 8.64h1z"/></symbol>
                 
                 <!-- Gradient for Ultimate Timer Ring -->
@@ -327,9 +329,12 @@
             </defs>
         </svg>
 
+        <!-- REFINED SCREENS -->
         <div id="mainMenuScreen" class="screen-overlay"><h1 class="text-4xl sm:text-5xl">Hindari Rintangan Pro</h1><p class="text-base sm:text-lg">Kumpulkan power-up, hindari rintangan, dan bertahanlah selama mungkin!</p><div class="screen-button-container"><button id="startGameButton" class="screen-button">Mulai Game</button><button id="settingsButton" class="screen-button">Pengaturan</button></div></div>
-        <div id="settingsScreen" class="screen-overlay"><h2>Pengaturan</h2><div class="settings-group"><label for="sfxVolume">Volume Efek Suara:</label><div class="settings-control"><input type="range" id="sfxVolume" min="0" max="1" step="0.01" value="0.8"><button id="sfxToggle" class="screen-button toggle-button on">ON</button></div></div><div class="screen-button-container" style="margin-top: 30px;"><button id="deleteHighScoreButton" class="screen-button">Hapus Rekor</button><button id="backToMenuButton" class="screen-button">Kembali</button></div></div>
+        <div id="settingsScreen" class="screen-overlay"><h2>Pengaturan</h2><div class="settings-group"><label for="sfxVolume">Volume Efek Suara:</label><div class="settings-control"><input type="range" id="sfxVolume" min="0" max="1" step="0.01" value="0.8"><button id="sfxToggle" class="toggle-button on">ON</button></div></div><div class="screen-button-container" style="margin-top: 30px;"><button id="deleteHighScoreButton" class="screen-button">Hapus Rekor</button><button id="backToMenuButton" class="screen-button">Kembali</button></div></div>
         <div id="confirmDeleteModal"><p>Apakah Anda yakin ingin menghapus rekor waktu tertinggi?</p><div class="confirm-buttons"><button id="confirmDeleteYes" class="screen-button modal-button-delete">Ya, Hapus</button><button id="confirmDeleteNo" class="screen-button modal-button-cancel">Batal</button></div></div>
+        <div id="gameOverScreen" class="screen-overlay"><h2>Game Over!</h2><p id="finalScore">Waktu Bertahan: 0,0s</p><p id="gameOverHighScore">Rekor Waktu: 0,0s</p><div class="screen-button-container"><button id="restartButton" class="screen-button">Mulai Ulang</button></div></div>
+
 
         <canvas id="gameCanvas"></canvas>
         
@@ -375,7 +380,6 @@
         <div id="leftControl"></div>
         <div id="rightControl"></div>
 
-        <div id="gameOverScreen" class="screen-overlay"><h2>Game Over!</h2><p id="finalScore">Waktu Bertahan: 0,0s</p><p id="gameOverHighScore">Rekor Waktu: 0,0s</p><div class="screen-button-container"><button id="restartButton" class="screen-button">Mulai Ulang</button></div></div>
     </div>
 
     <script>
@@ -976,7 +980,7 @@
         sfxVolumeSlider.addEventListener('input', (e) => { sfxVolume = parseFloat(e.target.value); applyVolumeSettings(); });
         sfxVolumeSlider.addEventListener('change', saveSettings); 
         deleteHighScoreButton.addEventListener('click', () => { if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("A3", "8n", Tone.now(), 0.7); confirmDeleteModal.style.display = 'flex'; });
-        confirmDeleteYes.addEventListener('click', () => { if (sfxOn && soundsReady) deleteScoreSynth.triggerAttackRelease(0.1, Tone.now()); localStorage.removeItem('obstacleGameHighScoreTime'); highScoreTime = 0; updateUIDisplay(); highScoreValueDisplay.textContent = formatTime(highScoreTime); if (gameOverScreen.classList.contains('active')) gameOverHighScoreDisplay.textContent = formatTime(highScoreTime); confirmDeleteModal.style.display = 'none'; });
+        confirmDeleteYes.addEventListener('click', () => { if (sfxOn && soundsReady) deleteScoreSynth.triggerAttackRelease(0.1, Tone.now()); localStorage.removeItem('obstacleGameHighScoreTime'); highScoreTime = 0; updateUIDisplay(); highScoreValueDisplay.textContent = formatTime(highScoreTime); if (gameOverScreen.classList.contains('active')) gameOverHighScoreDisplay.textContent = `Rekor Waktu: ${formatTime(highScoreTime)}`; confirmDeleteModal.style.display = 'none'; });
         confirmDeleteNo.addEventListener('click', () => { if (sfxOn && soundsReady) clickSynth.triggerAttackRelease("C3", "16n", Tone.now(), 0.5); confirmDeleteModal.style.display = 'none'; });
         
         startGameButton.addEventListener('click', () => {
